@@ -1,0 +1,168 @@
+%report type with font size of 12, two sided
+\documentclass[9.5pt,twoside]{report}
+\renewcommand{\baselinestretch}{1.5} 
+\usepackage[a4paper,width=150mm,top=25mm,bottom=25mm,bindingoffset=6mm]{geometry}
+% ------------------------
+%
+%   Variables & Commands 
+%
+% ------------------------
+\newcommand{\thesisAuthor}{B.Sc. Anton Karakochev}
+\newcommand{\thesisTitle}{Automatic Interaction Diagram Generation of Vue.js-based Web Applications}
+\newcommand{\gradeType}{Master of Science (M.Sc.)}
+\newcommand{\matrNumber}{553324}
+\newcommand{\universityName}{Hochschule für Technik und Wirtschaft Berlin}
+
+\newcommand{\code}[1]{\emph{\lstinline{#1}}}
+
+\title{\thesisTitle}
+\author{\thesisAuthor}
+\date{\today}
+% ------------------------
+%
+%        Packages
+%
+% ------------------------
+%use UTF-8 as an encoding
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\usepackage{caption}
+\usepackage{subcaption}
+% page style and footers, headers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[RO,LE]{\thesisTitle}
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Chapter \thechapter}
+\fancyfoot[CO,RE]{\thesisAuthor}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}
+
+%math, align*, etc.
+\usepackage{amsmath}
+%citing
+\usepackage[style=alphabetic,sorting=none]{biblatex}
+\addbibresource{references.bib}
+\usepackage{forloop}
+\usepackage{listings}
+\usepackage{xcolor}
+%custom packages
+\usepackage{hyperref}
+%autoref
+%https://tex.stackexchange.com/questions/180571/making-clickable-links-to-sections-with-hyperref
+%\usepackage{hyperref}
+%for H float position
+\usepackage{float}
+\restylefloat{table}
+%End packages
+
+%Adding captions to equations
+%https://stackoverflow.com/questions/149479/adding-a-caption-to-an-equation-in-latex
+\newcounter{equationset}
+\newcommand{\equationset}[1]{% \equationset{<caption>}
+  \refstepcounter{equationset}% Step counter
+  \noindent\makebox[\linewidth]{Equation set~\theequationset: #1}}% Print caption
+
+\colorlet{punct}{blue!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+%json language definition
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+%scala language definition
+
+\usepackage[T1]{fontenc}
+\usepackage{beramono}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{myScalastyle}{
+  frame=tb,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+}
+
+
+\begin{document}
+
+\input{titlepage}
+
+\input{abstract}
+
+\tableofcontents
+
+\chapter{Introduction}
+\input{chapters/01_introduction}
+
+\chapter{Fundamentals and State of The Art}
+\include{chapters/02_fundamentals.tex}
+
+\chapter{Concept}
+\include{chapters/03_concept.tex}
+\chapter{Implementation}
+\include{chapters/04_implementation.tex}
+\chapter{Testing and Evaluation}
+\include{chapters/05_evaluation.tex}
+\chapter{Conclusion}
+\include{chapters/06_conclusion.tex}
+
+\appendix
+\chapter{Appendix}
+\input{chapters/07_appendix}
+
+\listoffigures
+\listoftables
+
+\nocite{*}
+\printbibliography
+
+\newpage
+\end{document}

@@ -1,0 +1,66 @@
+
+\section{State of the Art}
+\subsection{TODO some papers}
+\section{Interaction Diagrams}
+\section{Scenario Testing}
+Scenario testing, was originally introduced in \textcite{kaner2003power} and later as \textcite{kaner2013introduction}. The author defines scenarios as hypothetical stories, which aid a person in understanding a complex system or problem. Scenario tests are tests, which are based on such scenarios.  \parencite[1]{kaner2013introduction}
+Further, \parencite[2-5]{kaner2003power} defines five characteristics, which make up a good scenario test as follows:
+A Scenario test must be
+\begin{itemize}
+    \item based on a story - based on a description of how the program is being used
+    \item motivating - stakeholders have interest in this test succeeding and would see to it's resolution
+    \item credible - probable to happen in the real world
+    \item complex - complex use, data or environment
+    \item easy to evaluate - it should be easy to tell if the test succeded or failed based on the results 
+\end{itemize}
+\textcite{kaner2013introduction} describes the biggest advantages of scenario testing to be  - understanding and learning the product in early stages of development(1), connecting of testing and requirement documentations(2), exposing shortcomings in delivering of desired benefits(3), exploration of expert use of the program(4), expose requirement related issues(5).
+
+\section{Behavior-Driven Development}
+Behavior-Driven Development (BDD), pioneered by  \textcite{north2006behavior} is a software development process, that combines principles from Test-Driven Development and Domain-Driven design \parencite{evans2004domain}. 
+
+It's main goal is to specify a system in terms of it's functionality (i.e. it's behaviors) with a simple domain-specific language (DSL) making use of English-like sentences. This stimulates collaboration between developers and non-technical stakeholders and further results in a closer connection between acceptance criteria for a given function and matching tests used for its validation.
+
+BDD splits a user story into multiple scenarios, each formulated in the form of \textit{Given}, \textit{When}, \textit{Then} statements, respectively specifying the prerequisite/context, event and outcomes of a scenario. 
+
+[TODO] example here
+
+At present ... there based on the division of behavior descriptions and behaviors. Such as Jest/Jasmine combine behavior descriptions and behaviors into one, whereas as Cucumber uses a DSL named Gherkin to specify the behavior descriptions and provides a set of tools to generate behaviors. 
+
+[TODO example A vs B? ]
+
+
+\subsection{the other one(forgot name)}
+splitting into ...
+\subsection{Gherkin Language}
+\section{Vue.js}
+structure etc.
+template part
+code part
+bindings
+
+\section{ESLint parser}
+
+ESLint \parencite{eslintMainPage} is a static code analysis tool for fixing of common code issues and enforcing of consistent code style for ECMAScript/JavaScript with the aim of improving code quality and avoiding bugs.
+
+
+ESLint uses \textit{rules} to report and fix discovered errors. Rules are on demand plugable extensions, which 
+
+
+... architecture 
+... rules
+
+
+.. parse estree and 
+
+... vue es lint
+
+ESLINT-vue
+ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, with the goal of making code more consistent and avoiding bugs. In many ways, it is similar to JSLint and JSHint with a few exceptions:
+
+    ESLint uses Espree for JavaScript parsing.
+    ESLint uses an AST to evaluate patterns in code.
+    ESLint is completely pluggable, every single rule is a plugin and you can add more at runtime.
+selectors
+visitor pattern
+linting
+AST reference

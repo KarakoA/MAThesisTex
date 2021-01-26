@@ -1,0 +1,388 @@
+\section{Parsing}
+\section{Generator}
+\section{Scenarios}
+
+\section{Final}
+
+0. Assuming no compile/runtime/unused var errors 
+
+[DATA]
+\begin{itemize}
+\item flatten the data - objects are represented as identifiers seperated by dots - (obj: {prop1: {prop2: 1}} => obj.prop1.prop2)
+\item for arrays/lists, append "[]" to the name (a: [] => a[])
+\item prepend this. to every variable
+\item represent each variable as nodes in the graph. For objects - create one node for each identifier and replace separators (dots) by directed edges (a.b => a -> b)  
+\end{itemize}
+NOTE: data is a tree
+NOTE: lists simply name is used a : [] a[]
+
+[VUE]
+\begin{itemize}
+\item for each binding create an edge from the data to the html element
+\item for two way bindings, create biderectional edge
+\item denote events by special thick edges
+\item for VFor statements, append 'i' to each widget in the list and create the respective bindings for the widgets. This 'i' will be refered to as the 'general case'. Further, take the name of the list being bound to and replace the key with 'name of list[i]'
+\item add connections for other elements accessing the WHOLE list
+\item add all access to individual elements to a list, which will later lazily be added
+
+\end{itemize}
+
+[METHODS]
+\begin{itemize}
+    \item "reads" & "writes" (if parameterized method, those can be included here as well )
+    \items "calls" - add parameter, called with. this expression or "else"(irrelevant)
+    \item for each call, based on params create a node with all connections reads/writes/calls
+    TODO return types, reassignments 
+\end{itemize}
+
+"assume both roads", if statements
+
+[INIT]
+handled as methods
+
+[POST PROCESSING(add lazily)]
+TODO create copies 
+"everything on a if not exists create basis" Own datastructure abstraction class "MyGraph"
+- Lists
+[VUE]
+
+for problem in problems
+problem renameTo problems[i]
+create all the nodes for that 
+
+
+outside of the list
+
+for each access
+problems[0]
+
+copy that chain over (how)
+and point to it 
+
+
+they are mixed though, both methods, vue and data access it 
+[general case first, local after] 
+
+"if exists" check
+ - true -> attach via qualified names 
+ - false -> copy general one e  
+[local first, general after]
+
+[DATA]? is the nested objects syntax enough? -> no(ish)
+this.data[0] should be this.data.data[0] for the idea to work, can be done
+
+
+- method arguments 
+
+arg name - used as identifier/accessor as well
+"args.X.Y.Z" later substitute args to find actual 
+
+[OTHER PROBLEM]
+"Reads, Writes"
+//Reads this.data.b
+let a = this.data.b
+//if int nothing, could also say writes a
+// assume it can, later fix it? will need to include type info in [data] as well
+
+//PROBLEM: need LHS RHS info in order to determine
+if LHS can just say "writes a"
+a = 5
+//problem if
+
+let a = this.data.a
+// this returns a ref to this.data
+// return with multiple is a problem [case x: return A, case y: return B]
+
+let a = other.method()
+
+//is just calls enough?
+
+
+dataAccess = someMethod() //this.data 
+//write not spotted
+dataAccess.something = {b:0}
+
+someMethod(args.data) // and does modifications to it, not reflected 
+
+
+//BIG PROBLEM how model A with different input as arg?
+//input parameters
+
+
+//one node per call solves it I guess
+
+//need to keep track of call parameters
+
+all with no "this"
+calls with "this"
+
+calls [method:params]
+
+
+
+
+
+-------
+assume no compile/runtime errors
+illegal access, etc.
+
+'MyGraph' Datastructure
+can resolve and check based on types if duplication is needed
+
+starts with data 
+
+when access - creates it (type, Single etc.)
+
+list 
+
+based on qualifiers register nodes and everything
+    
+this can then do 'all or single first' in compile step
+
+
+abstract computations based on variables etc., works for functions as well
+
+"computational graph" ["add" -> "compile"]
+ 
+\section{Visitors/Encoding Algorithm}
+
+[DATA]
+- Nested Objects
+this.X.Y.Z
+resolve everything as a tree (data is a tree, or can there be access to previous ones? this would model it anyway)
+
+
+
+- Lists
+[VUE]
+
+for problem in problems
+problem renameTo problems[i]
+create all the nodes for that 
+
+
+outside of the list
+
+for each access
+problems[0]
+
+copy that chain over (how)
+and point to it 
+
+
+they are mixed though, both methods, vue and data access it 
+[general case first, local after] 
+
+"if exists" check
+ - true -> attach via qualified names 
+ - false -> copy general one e  
+[local first, general after]
+
+[DATA]? is the nested objects syntax enough? -> no(ish)
+this.data[0] should be this.data.data[0] for the idea to work, can be done
+
+
+- method arguments 
+
+arg name - used as identifier/accessor as well
+"args.X.Y.Z" later substitute args to find actual 
+
+[OTHER PROBLEM]
+"Reads, Writes"
+//Reads this.data.b
+let a = this.data.b
+//if int nothing, could also say writes a
+// assume it can, later fix it? will need to include type info in [data] as well
+
+//PROBLEM: need LHS RHS info in order to determine
+if LHS can just say "writes a"
+a = 5
+//problem if
+
+let a = this.data.a
+// this returns a ref to this.data
+// return with multiple is a problem [case x: return A, case y: return B]
+
+let a = other.method()
+
+//is just calls enough?
+
+
+dataAccess = someMethod() //this.data 
+//write not spotted
+dataAccess.something = {b:0}
+
+someMethod(args.data) // and does modifications to it, not reflected 
+
+
+//BIG PROBLEM how model A with different input as arg?
+//input parameters
+
+
+//one node per call solves it I guess
+
+//need to keep track of call parameters
+
+all with no "this"
+calls with "this"
+
+calls [method:params]
+
+
+
+\section{Merging Algorithm}
+
+Idea A)
+traverse backward,
+Backward, compare Id's
+
+"transient" and "non-transient" nodes
+
+first "non-transient" nodes are equal?
+
+
+GUID seeded from Connections + name?
+
+
+will need
+updating of indexes of all the nodes
+
+
+
+Idea B)
+
+
+Groups -> via Nodes
+
+"collapsable" -> every tag, that is inside a VFor, or element of a list
+
+
+check non-collapsable tags inside a "group" (vertical line from html tag to data)
+
+"does the html tag have a group? is it collapsable?"
+
+
+node per node basis or group per group basis?
+
+comparing groups
+
+what about nested lists?
+
+Equality between trees:
+
+
+
+
+
+"If they are in one group and I could map it, get all non-group nodes"
+
+
+1) "Assign group numbers"
+
+- "graph inside graphs?"
+"what If accessed from outside?"
+base it on the data?
+
+2)
+
+Remove:
+[easy]
+   use graph operators -> remove all the nodes
+   
+   
+"General representation"
+
+[0] references [1] can it be modelled?
+all accessed //how about i+1
+
+//i+XYZ can't evaluate, bind it to all, upper bound when not sure
+
+Idea C)
+
+Graph with grouped nodes
+
+Conditions:
+mark some nodes as collapsable (everything, that could have an index - html tags inside VFor, data from lists), others as non-collapsable
+
+add one 'line' for each different access and one for the generic one
+
+Init:
+[easy]
+
+add a root list node 'control node'
+for each 'data' (problem[0...i] ) entry in list
+add a connection to top-er level node
+(if nested would point to other one, instead of root one)
+
+
+
+Equality 
+[medium]
+
+start with root 'control node' and go to bottom most child
+
+...
+start replacing
+...
+if 'control node' has one child, continue
+
+Remove
+[easy]
+use graph operator -> remove all nodes
+
+
+
+
+"am I interested in only merging in the generic one?"
+if yes I can make it linear :)
+
+if not, 
+
+
+
+
+
+
+
+----------
+nA -> d[0].a
+
+nA -> d[1].b
+= can't merge
+----
+
+----------
+nA -> d[0].a
+
+nA -> d[0].b
+= no need to merge, already done
+----
+
+do I even need to merge at all?
+not really
+
+nA -> d[0]
+nI -> d[i]
+I have this
+-----
+
+maybe I can use it to resolve d[i+X]... stuff
+a) just assume i can be anything, therefore it is equivalent to an 'all'
+
+b) try to make sense of the expression dependant to i, programatically (partial truth, but more precise, since don't know i)
+
+c) try to deduce i
+
+d) add an extra node and try to make sense of it. It should inherit all other relations (d[0],d[1]) etc. That would also mean stuff like [i-1], [i+1] could go to same bucket. maybe different i's ?
+
+"every relation" in the end
+
+
+
+How do I create equality for special access?
+
+
+
+
+use 'lowest common ancestor' for equality? 
+we need to ignore direction though
