@@ -1,6 +1,7 @@
 %report type with font size of 12, two sided
 \documentclass[10pt,twoside]{report}
 \renewcommand{\baselinestretch}{1.5} 
+
 \usepackage[a4paper,width=150mm,top=25mm,bottom=25mm,bindingoffset=6mm]{geometry}
 % ------------------------
 %
@@ -30,6 +31,9 @@
 \graphicspath{ {images/} }
 \usepackage{caption}
 \usepackage{subcaption}
+%glosarry
+\usepackage{glossaries}
+
 % page style and footers, headers
 %TODO this caused errors
 % \usepackage{fancyhdr}
@@ -64,6 +68,10 @@
 \usepackage[T1]{fontenc}
 \usepackage{beramono}
 
+
+ \input{chapters/00_glossary}
+
+
 \begin{document}
 
 %\input{titlepage}
@@ -94,6 +102,12 @@ So what if there is text here?
 
 \listoffigures{}
 \listoftables{}
+
+
+
+%TODO figure out how to print this
+\newpage
+\printglossaries
 
 \nocite{*}
 \printbibliography{}
