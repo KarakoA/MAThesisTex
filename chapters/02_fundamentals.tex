@@ -34,8 +34,83 @@ At present ... there based on the division of behavior descriptions and behavior
  \subsection{the other one(forgot name)}
  splitting into ...
 \subsection{Gherkin Language}
+
+\section{Model-View-ViewModel}
+\label{sec:mvvm}
+\gls{mvvm} is a design pattern, which helps in creating a clear separation between business and presentation logic and \gls{ui} of an application. \parencite[7-9]{microsoft_mvvm}
+
+In \gls{mvvm} there are three core components - the view, model and view model. Those components are clearly separated from each other - the view is aware of the view model and the view model is aware of the model. However, this does not hold in reverse - the model is unaware of the view model and the view model is unaware of the view. 
+
+\begin{figure}[H]
+  \includegraphics[width=\textwidth]{images/mvvm.png}
+   \caption{\gls{mvvm} design pattern overview, adapted from \parencite[7]{microsoft_mvvm}}
+   \label{fig:mvvm}
+ \end{figure}
+
+\subsection{View}
+The view is what the user sees. It is responsible for the structure, layout and appearance of the application.
+\subsection{View-Model}
+The view model implements event handlers and properties, to which the view can bind to. It also notifies the view of any changes to the underlying data. It defines the functionality, offered by the \gls{ui}, but the view determines how it is presented. 
+\subsection{Model}
+The model encapsulates the data of the application and validation its logic.
+
+
 \section{Vue.js}
-structure etc.
+
+Vue.js \parencite{vuejs_gh} is a progressive front end framework for building user intefaces and single-page applications based on the \gls{mvvm} design pattern described in \ref{sec:mvvm} \parencite{vuejs_book} \parencite{vuejs_guide}.  
+
+\subsection{Components}
+At the core of Vue.js are components, which are small, self-contained, composable and often reusable custom elements. Almost any type of application can be represented as a tree of components \parencite{vuejs_guide}. 
+
+In more concrete terms, a Vue.js component is a single file with the extension of \code{.vue}, which consists of a \code{template}, \code{script} and optional \code{style} part. The \code{template} is a HTML-based template, which can be parsed specification compliant browsers and HTML parsers. It can contain other components or html elements and is equivalent to the \textit{view} in \gls{mvvm}. 
+
+The \textit{code} section of a Vue.js component includes the view-model of the component. It has a special json object \code{data}, which is equivalent to the \gls{mvvm} model. %TODO not so nicely written
+The \code{script} part of a computed includes css-like styles.
+
+
+data binding is a general technique that binds data sources from the provider and consumer together and synchronizes them.
+
+
+\subsection{Reactivity}
+
+%TODO this with own words here
+% https://vuejs.org/v2/guide/reactivity.html
+
+\dots enables data binding
+\subsection{Directives}
+Vue.js enables one way bindings(from source - data to target - component or html tag) via the \code{v-bind} (line X,Y) or \textit{moustache} syntax (line Z). 
+Bindings can contain expressions (line X,Y). 
+
+Two way binding can be achieved using the \textit{v-model} directive (line,X,Y,Z). 
+Event handlers can be bound by the method name or also expressions.
+
+%TODO vfor binding here
+
+%TODO examples in code snippet image
+
+\subsection{Data Binding}
+Vue.js provides support for various forms of \gls{databinding} via a special syntax. Both the data and computed objects of a \code{Vue.js} component are reactive 
+
+
+Via a special syntax
+\code{Vue.js}
+- one way
+- two way
+- event bindings
+- inline expressions
+- computed properties
+
+\subsection{Vue.js directives}
+\subsection{Structure of a Component}
+
+(template, code etc.)
+
+bindings two way, one way
+
+g
+- data
+- computed properties
+
 template part
 code part
 bindings
@@ -67,6 +142,8 @@ If the fixable property is specified, it indicates that the errors reported by t
 
 The \code{create} function of rules takes as arguments a \code{context} and returns an object of methods which are called by ESLint for each node based on the \gls{visitor} pattern while traversing the \gls{ast}. ESLint provides a very powerful matching mechanism for specifying what nodes to match called selectors \parencite{eslintSelectors} inspired by \textcite{estoolsEsQuery}. 
 
+
+TODO custom architecture image
 
 TODO what are selectors
 
