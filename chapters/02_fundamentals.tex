@@ -2,7 +2,99 @@
 TODO
 \subsection{TODO some papers}
 
-\section{Interaction Diagrams}
+\section{Scenario Testing of AngularJS-based Single Page Web Applications}
+\textcite{zhang2019scenario} present a method with the goal of achieving better undestanding of AngularJS-based \glspl{spa} and also devised a way to specify test coverage criteria based on it. At the center of the proposed method are interaction diagrams, which are used to model the overall data and control flow of an application.\parencite{zhang2019scenario}
+
+\subsection{Abstract Syntax}
+\textcite{zhang2019scenario} model a AngularJS-based \gls{spa} as a tuple ($T$, $C$, $D$, $E$), where
+
+\begin{itemize}
+  \item $T$ is a HTML template, consisting of a set of HTML tags (widgets) ($T = \{h\}$)
+  \item 
+  $C$ is a controller (view-model), written in JavaScript. It is modeled as a tuple ($V$, $F$, $\$scope$), where $F$ and $V$ are top level variables and functions respectively and $\$scope \in V$ is a distinguished element of $V$. Further $V(\$scope)$ and $F(\$scope)$ denote all variables and functions of $\$scope$ respectively. $W = V \setminus \{\$scope\}$ denotes top level variables not in scope. Additionally $init \in F$ is defined as an initialization function
+  \item $D$ is a set of data bindings between HTML tags and variable properties of $\$scope$ $ D \subseteq \{(h,V(\$scope) \cup F(\$scope))\}$. Given $d = (n,o)$ $source(d) = n$ and $target(d) = o$. For Two-way bindings $D' \subseteq D$ and $\forall d \in D'$ $target(d) \in V(\$scope)$.
+  \item $E$ a set of event handler bindings between HTML tags and function properties of $\$scope$: $E \subset \{(h,F(\$scope))\}$. In addition, for each function $f \in F \cup F(\$scope)$, $R(f) \subseteq V \cup V(\$scope)$ and $W(f) \subseteq V \cup V(\$scope)$ are defined as the values that the given function reads from and writes to. $Inv(f) \in F $ are defined as the functions invoked by $f$. \parencite{zhang2019scenario}
+\end{itemize}
+\subsection{Interaction Diagrams}
+\label{intro:zhang_interaction_diagrams}
+\textcite{zhang2019scenario} define interaction diagrams as a directed graph ($N$, $E$) where the set of nodes $N$ is defined as the union of $N_H$ (HTML tag nodes), $N_{\$scope}$ (TODO name), $N_js$ (TODO name). 
+$N_H = \{n_h | (h,v) \in D\}$ %TODO those are html tags
+
+$N_{\$scope} = \{n_v | (h,v) \in D\} \cup \{n_e | (h,e) \in E\} $ %(TODO those are databindings and events)
+
+$N_js = \{n_v | v \in W\} \cup \{n_f | f \in F\} $
+
+$n_init$ is distinguished by an incoming arrow without a starting vertex
+
+Edges:
+
+bindings 
+
+$e_d = (target(d),source(d))$
+$E_{data} = \{e_d |  d \in D \}$
+
+addiionaly if $d \in D'$ also create $e'_t = (source(t),target(t))$ and $E'_data = \{e_d |  d \in D' \}$
+
+for events ($E_{event}$) $(h,f) \in E$,
+
+write $E_{W}$ $(f,v)$ where $f \in F \cup F(\$scope), v \in W(f)$
+
+read $E_{R}$ $(v,f)$ where $f \in F \cup F(\$scope), v \in R(f)$
+
+invoked $E_{Inv}$ $(f,v)$ where $f \in F \cup F(\$scope), v \in I(f)$
+
+
+$E_{init}$ default values of widgets 
+for each $h \in T $ where $ \nexists v | (h,v) \in D$ create an edge $(h,v)$ 
+\
+explained in a lot of detail in \parencite[9]{zhang2019scenario}
+
+\subsection{Testing and Interactions}
+%TODO ... the red text p10
+\textcite{zhang2019scenario} define an interaction as a round of user input including updates to the widgets by the application. Interaction can be triggered explicitly by the user (by invoking an event handler) or implicitly while the user is updating data. \parencite{zhang2019scenario} %TODO anton I don't model it like ths, don't need
+
+Given the interaction diagrams as described in \ref{intro:zhang_interaction_diagrams} it is possible to derive which widgets get updated by a user input action or set up by the initial function. \textcite{zhang2019scenario} define it formally as follows:
+\begin{quote}
+\label{quote:interactions}
+Given a node $n \in N_H \cup \{init\}$, we say a node $m \in N_H$ \textit{reacts} to $n$ iff
+  \begin{enumerate}
+      \item $\exists n_0,n_1,n_2, \ldots,n_k \in N, n_0=n,n_k=m$ such that for each $0 \leq i < k  $ $(n_i,n_{i+1}) \in E$, and 
+      \item $\forall n_p, 1 < p \leq k$ and $\forall e \in E, target(e)= n_p$ it holds that $e \notin E_{event}$  
+  \end{enumerate}
+  We write $l(n)$ for the set of all nodes representing the widgets that react to $n$. This set contains the widgets that are automatically updated upon user input,
+  and thus constitute an interaction.
+  \end{quote}
+
+For example, in order for the widget $n$, which was clicked by the user, to update the widget $m$, $m$ must be reachable from $n$ by following the directed edges of the interaction diagram and only the first edge can be an event-handling edge.
+
+What is crucial is that the interactions $l(n)$ define an upper bound of what can be updated, i.e. what might get updated. Nevertheless, this information is sufficient in order to be able to define coverage criteria \parencite{zhang2019scenario}.
+
+\subsection{Coverage Criteria}
+Interactions should not be tested in isolation and in order for tests to make sence, interactions as preconditions are required \parencite{zhang2019scenario}. 
+In order to define coverage criteria, \textcite{zhang2019scenario} extend their notation, as described in \ref{intro:zhang_interaction_diagrams}, by defining - $\mathcal{I}  = \{w\in T | l(w) \neq \emptyset \}$ all widgets, that result updates.
+
+A sequence of user interactions, including the initial function is refered to as a \textit{scenario} $A=(a_0,a_1,\ldots, a_n)$ where $a_0=init$ and $\forall0 < k \leq n, a_k \in \mathcal{I}$. The widgets, to which a scenario reacts, are equal to the widgets to which the last widget in the scenario reacts 
+- $l(A)=l(a_n)$. 
+
+
+The set of scenarios is generated by starting with the initial scenario, containing only the initial function $S_0 = \{(init)\}$ and prolonging it iteratively by each widget, where the user can take an action. This is terminated once all $i \in \mathcal{I}$ are included in at least one scenario. Formally: For $n > 0, S_{n+1}= \{p \in S_n, x \in l(p) \cup \mathcal{I}\}$ 
+
+Based on the scenario sets \textcite{zhang2019scenario} define the following coverage criteria:
+\begin{quote}
+  
+
+  
+\begin{itemize}
+  \item Each set $S_n$ of test scenarios should be tested.
+  \item For each given $S_n$, each $p \in S_n$ should be tested.
+  \item For each given $p$, each $w \in l(p)$ should be tested. That is, there should be a
+  test case for each widget that may be modified after the scenario $p$.
+\end{itemize} 
+\end{quote}
+%TODO note in no way is l i in I restricted to a be clickable widget. reflect on that
+.. example, which will be implemented here in vue and described in sec xyz. 
+
+
 \section{Scenario Testing}
 Scenario testing, was originally introduced in \textcite{kaner2003power} and later as \textcite{kaner2013introduction}. The author defines scenarios as hypothetical stories, which aid a person in understanding a complex system or problem. Scenario tests are tests, which are based on such scenarios.  \parencite[1]{kaner2013introduction}
 Further, \parencite[2-5]{kaner2003power} defines five characteristics, which make up a good scenario test as follows:
