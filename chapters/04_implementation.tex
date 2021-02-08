@@ -1,73 +1,130 @@
-Meaningful abstractions
+\section{Project Structure and Overview}
+The application is written mostly in TypeScript using npm as a package manager and Node.js as a runtime environment. 
 
+Notable dependencies are TypeScript, for stricter syntax and types, lodash for enrichening of collections, babel as a transcompiler, eslint, estree and eslint-plugin-vue for parsing Vue.js code, d3-graphviz in comination with light-server for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
+%TODO cite all of those directly?
 
-params either NOT\_USED
-or THIS and then we have THIS.X, THIS.Y etc.. doesn't change
+%lint, ci, tests, etc? gith?
 
+\subsection{Project structure}
+%TODO define lang
+The main source files of the project and their tests are included in the \code{src} directory and structured in several packages, each corresponding to a step in the process, except common, which is shared among all steps. Each will be described in more detail in the following sections.
+Each package includes a models directory, which inludes the data types defined and used in this section.
+The \code{web} directory contains code used to view the resulting diagram in the browser.
+The \code{scripts} directory includes helper bash scripts, \code{results} holds snapshots of the results throughout development (with the latest being the current) and \code{resources} hold various additional files needed.
+\begin{lstlisting}
+  root:.
+  |-- resources
+  |   |-- output
+  |
+  |-- results
+  |
+  |-- scripts
+  |
+  |-- src
+  |   |-- common
+  |   |   |-- models
+  |   |
+  |   |-- main.ts
+  |   |
+  |   |-- generator
+  |   |   |-- models
+  |   |
+  |   |-- parsing
+  |   |   |-- builders
+  |   |   |-- models
+  |   |   |-- visitors
+  |   |
+  |   |-- scenarios
+  |
+  |-- web
+\end{lstlisting}
 
-Method: f(params) => reads: names, writes: names, calls: [{name,params}]
+\section{Parsing Vue.js}
 
+Instead of implementing a parser, which directly outputs the simplfied Vue.js \gls{ast} described in \ref{ast} the capabilities of \textcite{eslint}  %TODO add cit
+and \parencite{eslint_vue_parser} were used. 
+The source files, which handle the parsing reside in the \code{parsing} directory.
+The file \code{eslinter.ts} provides a wrapper around the ESLint Node.js API of eslint. Custom visitors were implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method defintions, computed properties and init.
 
-ref par -> 
-
-
-
-return statements?
-
-model as partial function?
-
-
-
-
-
-
-//actual   -> calls:method2
-//expected -> calls:method2, writes obj.a
-def method1(){
-  let obj = method2()
-  obj.a = 2
+\subsection{Top Level Properties}
+The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} tag of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
+%TODO lang
+\begin{lstlisting}
+"Property[key.name = data] ReturnStatement > ObjectExpression"(node){
+  ...
 }
+\end{lstlisting}
+For each of its properties \ref{eslint:property} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression} \ref{eslint:object_expression}) it is already concatenated with the previously obtained key. Finally all properties are prefixed with 'this'.  
 
-def method2(){
-  return this.}
+\subsection{Bindings}
+The ESlint \gls{ast} nodes, which are interesting when parsing the bindings are \code{VElement} \ref{eslint:velement}, 
+\code{Identifier} \ref{eslint:identifier}, \code{MemberExpression} \ref{eslint:member_expression} and \code{CallExpression} \ref{eslint:call_expression}. 
 
-obj
-}
+A property identifier can be a single \code{Identifier} or a \code{MemberExpression}, which can contain other \code{Identifier} nodes or \code{MemberExpression} nodes. Property Identifiers are extracted by 
 
-
-
-methods:
-
-A -> B
-B -> A
+\code{VElement} nodes represent any HTML tag. Whenever any ends
 
 
-A -> return B
-B -> return A
 
-A -> 
+"VAttribute[key.name.name=on] > VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
+  node
+) {
 
-A -> (B,C)
-B -> (A,C)
-C -> None
+Two-way
+"VAttribute[key.name.name=model] > VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
+  node
+) 
 
-A = -B - C
-B = -A - C
-C = 0
-
-A = -A -C
-2A = C
-
-A = C/2
-
-B = C/2 -C
-B = 
-
-equation?
-linear equation solvable when n Variables equal to number of lines
+//other identifiers
+":not(:matches(VAttribute[key.name.name=on], VAttribute[key.name.name=model],VAttribute[key.argument.name=key], VAttribute[key.name.name=for])) >  VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
+  node
+% ) {
+%   if (utils.isRootNameOrCallExpression(node) && utils.notArgument(node))
+%     builder.identifierOrExpressionNew(node, BindingType.ONE_WAY);
+% },
 
 
-https://en.wikipedia.org/wiki/System_of_linear_equations
+vfor containing
 
-https://courses.lumenlearning.com/boundless-algebra/chapter/systems-of-equations-in-two-variables/
+velement exited
+\subsection{Method Definitions}
 
+eslint -> ast defined previously
+
+wrappper eslinter
+- eslinter (encapsulate eslint, wrapper)
+- visitors (using selectors extract)
+- builders transformation 
+
+how what captured in detail
+
+- builders transformation 
+wrapper
+
+
+not exact by types, more general, handled by eslint. also the assumption that code good 
+\section{Interaction Diagram Generation}
+
+- as described in concept
+- takes models from previous section
+
+- method cache to abstarct from being resolved twice
+- method resolver
+
+- custom graph type, "create if not exist" 
+
+- for each in init resolve
+- for each in bindings resolve
+
+- indirectly called in the end %TODO check again
+- add edges for numeric
+
+% 2-3 pages?
+\section{Scenario Generation}
+
+% half a page, 1 page?
+traversal
+print to ui, but can ...
+
+\ldots usage?
