@@ -72,6 +72,7 @@ NAME_IDENTIFIER:  JS_IDENTIFIER;
 JS_IDENTIFIER:  (UNICODE | '$' | '_') (UNICODE | '$' | '_' | [0-9])*;
 UNICODE: [\u0000-\uFFFF];
 \end{lstlisting}
+\label{ast}
 
 A Vue.js \gls{spa}, including all the necessary information for \ref{concept:parsing_limits}, can be defined using the above grammar. 
 
@@ -138,14 +139,111 @@ Each tag includes its location in the source code (starting and ending line and 
 \code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practise, it is still possible for computed properties to have side effects and therefore it was decided to model them as methods.
 
 %TODO explain compound etc graph
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                   %
+%   Interaction Diagram Generation  %
+%                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interaction Diagram Generation}
-Interaction diagrams can be generated from the simplfied Vue.js \gls{ast} in the following way.
-For each binding (tag, binding sources tuple) in bindings $(t,S) \in bindings$ :
 
-for each binding source $s \in S$
-if it is an accesedVariable $v$
-check if it is a computed property by looking up the \code{computedProperties}. If true, treat it as a method, which will be explained below. If false, check if it is a property, by checking if there is a top level property in $topLevelPropertiers$, which starts with the same identifier (ignoring the \code{this} prefix).
-If true, prefix $this$ and create a node for each $id$ in $identifier$. Create a \gls{guid} for each node, by starting from \code{this} and in sequence iterating over each $id$ in $identifier$ concatenate its $id$ with the $id$ of the node before it and also set it as its parent. Connect those nodes  with unidrectional edges starting from \code{this} and label each edge \textit{data}. Assign a label to each node, equal to its $id$ if it is a \code{NAME_Identifier}, or else to the name of the previous node including the name of the current one in square brackets. % TODO if non exist create
+The simplified Vue.js \gls{ast} can be used to create a directed graph, which will represent the interaction diagrams. It is hard to directly generate this graph, therefore the capabilities of a directed, compoundend graph will be leveraged and later on converted to a directed graph. 
+
+Vertices in this graph have the following properties
+\begin{enumerate}
+    \item \gls{guid} - used to reference and globally identify the vertex 
+    \item \code{label} - the name of the vertex, which is going to be displayed
+    \item \code{type} - the type of the vertex (data, tag or method). Additionally for data vertices: numeric, generic or undefined (representing simple data vertices)
+    \item \code{loc} - defined only on tag verices. Their location in the source code
+    \item \code{parent} - defined only on vertices of type 'data'. A \gls{guid} of another vertex, used for a child/parent relationship (compound graph).
+\end{enumerate}
+
+Edges in the graph are directed and each have a label property, which is one of 'event', 'calls' or 'simple'. 
+
+\subsection{Variable Identifiers}
+\label{concept:variable_identifiers}
+Variable identifiers are represented by \astnode{identifier} and \astnode{thisIdentifier} in the \gls{ast} \ref{ast}. For the \astnode{this} and for each \astnode{id} node in the \astnode{identifier} or \astnode{thisIdentifier} a vertex is created in order. 
+Those vertices are connected using unidrection edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous.
+
+Each vertex has a \gls{guid} equal to the value of its terminal symbol (\astnode{NUMERIC_INDEX}, \astnode{GENERIC_INDEX} or \astnode{NAME_IDENTIFIER}), concatenated with the value of the previous vertix.
+The \code{label} of those vertices are equal to the terminal symbol in case of \astnode{NAME_IDENTIFIER} and in case of \astnode{GENERIC_INDEX} and \astnode{NUMERIC_INDEX}, combined with the \code{label} of the previous vertex using square braces.  Set the type of each vertex to 'data'.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{images/graph_simple.png}
+     \caption{Example Graph obtained for the identifier \code{this.problems[0].a} }
+     \label{fig:graph_simple}
+\end{figure}
+
+\subsection{Object representation}
+
+Using the representation for identifiers in the previous section, objects will result in being displayed dynamically, based on which properties are accessed. Nodes and edges are created on a 'create if non-existent' basis. In the example below, if \code{this.problem.b} is accessed after \code{this.problem.a} it will only result in the creation of the node \code{a} and edge \code{this.problem} -> \code{this.problem.b}.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{images/graph_object.png}
+     \caption{Example Graph generated obtained for the following object accesses - \code{this.problem.a}, \code{this.problem.b},  \code{this.problem.author.name} }
+     \label{fig:graph_object}
+\end{figure}
+
+Furthermore, updates can be formulated nicely with the above representation. If \code{problem} were to be changed, it would result in a cascade update of all properties. If \code{author} would be change, it would only result in a cascading change in \code{name}. \subsection{List representation}
+
+Lists will be represented based on the principle shown in \ref{fig:graph_list_generic} for a list named $P$.  
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{images/graph_list_generic.png}
+     \caption{Generic List representation}
+     \label{fig:graph_list_generic}
+\end{figure}
+
+Concrete elements, which are accessed, are detoned as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be updated to all elements of a list and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
+
+
+The same construct can be leveraged also when it comes to properties of list elements and will be described in more detail in %TODO
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{images/graph_list.png}
+     \caption{Concrete example of a list representation}
+     \label{fig:graph_list}
+\end{figure}
+
+\subsubsection{Method representation}
+\label{concept:methods}
+Methods have two related \gls{ast} nodes - \astnode{methodDefinition}, representing the definition of a method and \astnode{calledMethod} representing a call of a method. 
+
+First it should be determined if a vertex needs to be created for an \astnode{calledMethod} node. This is done by looking up based on the name of the \astnode{calledMethod} in \astnode{methodDefinition}, ignoring \astnode{THIS}. If the lookup is succesful a vertex should be created, otherwise the called method does not belong to context and is of no interest.
+
+The next step is to resolve the names of the arguments it has been called with \astnode{calledArgs}. Every argument, that can neither be found in \astnode{computedProperties} nor \astnode{topLevelProperties} is replace by a fixed word such as $OTHER$ or $*$. In order to obtain the \gls{guid} of the vertex, the name of the \astnode{methodDefinitionIdentifier} is taken, \astnode{THIS} is excluded, and concatened with the the resolved arguments, which are joined with $,$ and surrounded with brackets. The \code{label} of this node is equal to its name, excluding \astnode{THIS} from arguments. 
+
+The vertex for the method call is now completed. Multiple calls of this method with the same arguments will all result in the same vertex.
+
+Now vertices for nodes the method interacts with, based on its \astnode{methodDefinition}, have to be created. Those include the variables it reads - \astnode{reads}, and writes - \astnode{writes} and methods it calls - \astnode{calls}. 
+
+Firstly, the arguments from the \astnode{methodDefinition} need to be substituted with the resolved arguments the method was actually called with and update all \astnode{reads}, \astnode{writes}  \astnode{calls} referening them. All of them, which do not start with \astnode{THIS} can be discarded, since they do not belong to the context. Once filtered out, create a list of vertices for each variable in \astnode{reads} and \astnode{writes} as described in \ref{concept:variable_identifiers} and connect the most precise of those (the last of each list) to the method vertex. For the vertices resulting from \astnode{writes}, this edge has a label of 'writes' and the property vertex as the source and method vertex as the sink. For the vertices resulting from \astnode{reads}, this edge has the method vertex as the source and property vertex as the sink. 
+Finally the process described in this section is repeated recursively for each \astnode{calledMethod} node in \astnode{calls} and an edge labeled 'calls' is added from the current method vertex to the resulting ones. 
+
+\subsubsection{Computed property representation}
+\label{concept:computed_property}
+
+%TODO image, y/n?
+
+\subsubsection{Combining it all together}
+
+Interaction diagrams can be generated from the simplfied Vue.js \gls{ast} in the following way:
+
+%TODO how to indent
+For each \astnode{binding} in \astnode{bindings}:
+- for each \astnode{tag}, \astnode{bindingSource}  in \astnode{binding}:
+
+Create a vertex for \astnode{tag}, with a \gls{guid} \astnode{tagId} and label \astnode{name} and type 'tag'.
+
+if the \astnode{binding} is an \astnode{accessedVariable}, determine if it is a computed property by looking it up in \astnode{computedProperties} and if so, treat it as a computed property, and create vertices as described in \ref{concept:computed_property}. Otherwise determine if it as top level property, by doing a lookup on \astnode{topLevelProperties}, treat it as a proeprty and create vertiecs for it as desribed in \ref{concept:variable_identifiers}. In either cases, connect it to the \astnode{tag} vertex, based on the binding type. If the \astnode{accessedVariable} is neither, it does not belong to context and can be discarded. %TODO YADA YADA, ignore this prefix when checking
+
+if the \astnode{binding} is an \astnode{calledMethod} create a vertices for it as described in \ref{concept:methods}. Connect it to the \astnode{tag} vertex, based on the binding type.
+
+Based on binding type, the following edges are created:
+A) If the binding type is an event binding, create an 
+edge with the tag vertex as a source and the binding vertex as sink and label it 'event'. 
+B) If the binding type is one-way, create an edge with the binding vertex as source and the tag vertex as sink.
+C) If the binding type is two-way, create both edges - A) and B).
+
+
 %TODO also include types in text info
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_numeric_generic.png}
@@ -153,34 +251,13 @@ If true, prefix $this$ and create a node for each $id$ in $identifier$. Create a
      \label{fig:ast_list_complex_nodes}
 \end{figure}
 
-If the binding source $s$ is a \code{calledMethod}, check if it exists in $methodDefinitions$ by excluding the \code{this} prefix. If true, prefix it with \code{this} and create a node for it. Replace each of it's arguments, which cannot be found in \code{topLevelProperties} or \code{computedProperties} by a fixed word such als $OTHER$ or $*$, join them with $,$ and surround them with brackets. Concatenate it with the name of the method to form the \gls{guid} of the method. Remove \code{this} identifiers from the method name and arguments and and set it as its label.
+For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads} , \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
 
-The node for the method itself is now completed, the next step is to create nodes for it's the properties it $reads$ and $writes$ and for other methods it $calls$, if they do not yet exist based on its $methodDefinition$. The first step is to substituted the method definition arugments with the called arguments and update all $reads$, $writes$ and $calls$ referencing them. Now $reads$, $writes$ and $calls$ which do not start with \code{this} can be removed since they are not properties. After this is done, create a node for each property in $reads$ and $writes$ in the same way as described above. 
-For each property in $writes$ add an edge with the property as the source and the current method as the sink. For each property in $calls$ add an edge with current method as the source as the property as the sink.
-
-For each method in $calls$, which does not yet exist in the graph, recursively repeat the above process and add and edge from the current method to it labelled $calls$. 
-
-
-If any nodes were created in the previos steps, create a node for the tag $t$ with a \gls{guid} $tagId$ and label $name$. Based on the binding type create edges to connect $t$ and each of the nodes.
-If the binding type is an event binding, create an 
-%todo introduce n for nodes?
-edge with source $t$ and sink \textit{node} and label it $event$. 
-If the binding type is one-way, create an edge with source \textit{node} and sink $t$.
-If the binding type is two-way, create an edge
-
-with source $t$ and sink \textit{node} and label it $event$ and a second edge with source \textit{node} and sink $t$. In essence two-way bindings create the same edges as a combination between one-way and event bindings.
-
-%todo can cause conflicts? no can't cause 'this.method
-For the initial method - $createdMethod$ create a node with \gls{guid} and name equal to \textit{created}. Resolve its $reads$, $writes$ and $calls$ in the same maner as methods, described in the previos section.
 %Example of all edge types simple
 
-%based on ids connections
 
-%TODO generic/numeric thing of adding more node relations
-
-% TODO comment on how based on "if exists create"
-% dynamic, only tohse that icluded left\
 % TODO this.x.method assumes mutation of X  
+
 Due to dynamic nature\dots
 \section{Scenario Generation}
 

@@ -5,7 +5,7 @@ program: bindings methodDefinitions createdMethod topLevelProperties computedPro
 topLevelProperties: thisIdentifier*;
 methodDefinitions: methodDefinition*; 
 createdMethod: methodDefinition;
-computedProperties: (thisIdentifier reads writes calls)*;
+computedProperties: (methodDefinitionIdentifier reads writes calls)*;
 
 methodDefinition: methodDefinitionIdentifier methodArgs reads writes calls;
 
@@ -19,8 +19,8 @@ accesedVariable: identifier;
 calledArgs: (calledMethod | accesedVariable)*;
 
 bindings: binding*;
-binding: tag bindingSources+;
-bindingSources: accesedVariable | calledMethod (EVENT_BINDING | ONE_WAY_BINDING)
+binding: tag bindingSource+;
+bindingSource: (accesedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING)
               | accesedVariable TWO_WAY_BINDING;
 
 tag: name tagId loc;
@@ -30,7 +30,7 @@ loc: start end;
 start: LINE COLUMN;
 end: LINE COLUMN;
 
-calledMethodIdentifier: id* NAME_IDENTIFIER | id* NAME_IDENTIFIER;
+calledMethodIdentifier: methodDefinitionIdentifier | id* NAME_IDENTIFIER;
 
 methodDefinitionIdentifier: THIS NAME_IDENTIFIER;
 thisIdentifier: THIS identifier;

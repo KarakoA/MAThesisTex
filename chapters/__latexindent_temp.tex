@@ -138,7 +138,21 @@ Each tag includes its location in the source code (starting and ending line and 
 \code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practise, it is still possible for computed properties to have side effects and therefore it was decided to model them as methods.
 
 %TODO explain compound etc graph
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                   %
+%   Interaction Diagram Generation  %
+%                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interaction Diagram Generation}
+
+The simplified Vue.js \gls{ast} can be used to create a directed graph, which will represent the interaction diagrams. It is hard to directly generate this graph, therefore the capabilities of a directed, compoundend graph will be leveraged and later on converted to a directed graph.
+
+\subsubsection{Identifier and Object representation}
+\subsubsection{List representation}
+\subsubsection{Method representation}
+
+\subsubsection{Combining it all together}
+
 Interaction diagrams can be generated from the simplfied Vue.js \gls{ast} in the following way.
 For each binding (tag, binding sources tuple) in bindings $(t,S) \in bindings$ :
 
@@ -153,7 +167,7 @@ If true, prefix $this$ and create a node for each $id$ in $identifier$. Create a
      \label{fig:ast_list_complex_nodes}
 \end{figure}
 
-If the binding source $s$ is a \code{calledMethod}, check if it exists in $methodDefinitions$ by excluding the \code{this} prefix. If true, prefix it with \code{this} and create a node for it. Replace each of it's arguments, which cannot be found in \code{topLevelProperties} or \code{computedProperties} by a fixed word such als $OTHER$ or $*$, join them with $,$ and surround them with brackets. Concatenate it with the name of the method to form the \gls{guid} of the method. Remove \code{this} identifiers from the method name and arguments and and set it as its label.
+If the binding source $s$ is a \code{calledMethod}, check if it exists in $methodDefinitions$ by excluding the \code{this} prefix. If true, prefix it with \code{this} and create a node for it. Replace each of it's arguments, which cannot be found in \code{topLevelProperties} or \code{computedProperties} by a fixed word such as $OTHER$ or $*$, join them with $,$ and surround them with brackets. Concatenate it with the name of the method to form the \gls{guid} of the method. Remove \code{this} identifiers from the method name and arguments and and set it as its label.
 
 The node for the method itself is now completed, the next step is to create nodes for it's the properties it $reads$ and $writes$ and for other methods it $calls$, if they do not yet exist based on its $methodDefinition$. The first step is to substituted the method definition arugments with the called arguments and update all $reads$, $writes$ and $calls$ referencing them. Now $reads$, $writes$ and $calls$ which do not start with \code{this} can be removed since they are not properties. After this is done, create a node for each property in $reads$ and $writes$ in the same way as described above. 
 For each property in $writes$ add an edge with the property as the source and the current method as the sink. For each property in $calls$ add an edge with current method as the source as the property as the sink.
