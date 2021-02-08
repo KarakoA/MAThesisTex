@@ -1,0 +1,51 @@
+
+\lstset{% This applies to ALL lstlisting
+backgroundcolor=\color{yellow!10},%
+numbers=left, numberstyle=\tiny, stepnumber=2, numbersep=5pt,%
+}%
+
+%https://www.cl.uni-heidelberg.de/courses/ss18/wissschreib/material/listings.pdf
+
+
+\lstdefinestyle{html}{
+    basicstyle=\small\ttfamily\color{red},%
+    breaklines=true,
+    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
+    commentstyle={\color{gray}\itshape},%                  gray italics for comments
+    morecomment=[l]{//},%                                  define // comment
+    emph={%
+        STRING%                                            literal strings listed here
+        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
+    alsoletter={:,|,;},%
+    morekeywords={:,|,;},%                                 define the special characters
+    keywordstyle={\color{black}},%                         and format them in black
+}
+\lstdefinestyle{antrl}{
+    basicstyle=\small\ttfamily\color{red},%
+    breaklines=true,
+    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
+    commentstyle={\color{gray}\itshape},%                  gray italics for comments
+    morecomment=[l]{//},%                                  define // comment
+    emph={%
+        STRING%                                            literal strings listed here
+        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
+    alsoletter={:,|,;},%
+    morekeywords={:,|,;},%                                 define the special characters
+    keywordstyle={\color{black}},%                         and format them in black
+}
+%https://tex.stackexchange.com/questions/78291/lstdefinestyle-syntax-highlighting
+% Applies only when you use it
+\lstdefinestyle{antrl-default}{
+    basicstyle=\small\ttfamily\color{red},%
+    breaklines=true,%                                      allow line breaks
+    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
+    moredelim=*[s][\color{black}\ttfamily]{options}{\}},%  options in black (until trailing })
+    commentstyle={\color{gray}\itshape},%                  gray italics for comments
+    morecomment=[l]{//},%                                  define // comment
+    emph={%
+        STRING%                                            literal strings listed here
+        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
+    alsoletter={:,|,;},%
+    morekeywords={:,|,;},%                                 define the special characters
+    keywordstyle={\color{black}},%                         and format them in black
+}
