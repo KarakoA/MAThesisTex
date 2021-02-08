@@ -15,7 +15,7 @@ This thesis only includes the following features of Vue.js:
     \item Any one or two-way binding expressions (\code{v-model}, \code{v-bind}, "moustache", \code{v-if}) excluding \code{v-else}
     \item nested \code{v-for} statements for lists, excluding iterating through properties of an object or iteration with index (property zipped with index)
     \item distinguishing between properties and computed properties
-    \item complex object and nested lists models 
+    \item complex object and lists (non-nested) models 
     \item methods, including the resolution of arguments, they have been called with (excluding methods called with other methods as arguments)
 \end{itemize}
 
@@ -138,7 +138,7 @@ Each tag includes its location in the source code (starting and ending line and 
 
 \code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practise, it is still possible for computed properties to have side effects and therefore it was decided to model them as methods.
 
-%TODO explain compound etc graph
+%TODO explain compound etc graph in intro?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                   %
 %   Interaction Diagram Generation  %
@@ -195,7 +195,7 @@ Lists will be represented based on the principle shown in \ref{fig:graph_list_ge
 Concrete elements, which are accessed, are detoned as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be updated to all elements of a list and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
 
 
-The same construct can be leveraged also when it comes to properties of list elements and will be described in more detail in %TODO
+The same construct can be leveraged also when it comes to properties of list elements and will be described in more detail in %TODO add the image and add this below as an example
 
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_list.png}
@@ -203,11 +203,13 @@ The same construct can be leveraged also when it comes to properties of list ele
      \label{fig:graph_list}
 \end{figure}
 
-\subsubsection{Method representation}
+\subsection{Method representation}
 \label{concept:methods}
 Methods have two related \gls{ast} nodes - \astnode{methodDefinition}, representing the definition of a method and \astnode{calledMethod} representing a call of a method. 
 
-First it should be determined if a vertex needs to be created for an \astnode{calledMethod} node. This is done by looking up based on the name of the \astnode{calledMethod} in \astnode{methodDefinition}, ignoring \astnode{THIS}. If the lookup is succesful a vertex should be created, otherwise the called method does not belong to context and is of no interest.
+First it should be determined if a vertex needs to be created for an \astnode{calledMethod} node. This is done by looking up based on the name of the \astnode{calledMethod} in \astnode{methodDefinition}, ignoring \astnode{THIS}. If the lookup is succesful a vertex should be created as described below. If not, it should be checked if the method is a method call on a top level property instance. This can be done by comparing if it starts in the same way as one of \code{topLevelProperties}. %TODO that's not so clear an a bit slapped here. check tomorrow
+If that's the case, it is assumed, that it mutates whole property and the method should instead be treated as a write operation.
+If both of the above fail, the called method does not belong to context and is of no interest.
 
 The next step is to resolve the names of the arguments it has been called with \astnode{calledArgs}. Every argument, that can neither be found in \astnode{computedProperties} nor \astnode{topLevelProperties} is replace by a fixed word such as $OTHER$ or $*$. In order to obtain the \gls{guid} of the vertex, the name of the \astnode{methodDefinitionIdentifier} is taken, \astnode{THIS} is excluded, and concatened with the the resolved arguments, which are joined with $,$ and surrounded with brackets. The \code{label} of this node is equal to its name, excluding \astnode{THIS} from arguments. 
 
@@ -243,25 +245,13 @@ edge with the tag vertex as a source and the binding vertex as sink and label it
 B) If the binding type is one-way, create an edge with the binding vertex as source and the tag vertex as sink.
 C) If the binding type is two-way, create both edges - A) and B).
 
+For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads}, \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
 
-%TODO also include types in text info
-\begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_numeric_generic.png}
-     \caption{Nodes created for identifiers of \ref{fig:ast_list_complex} }
-     \label{fig:ast_list_complex_nodes}
-\end{figure}
+%TODO example of all edge types simple?
 
-For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads} , \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
-
-%Example of all edge types simple
-
-
-% TODO this.x.method assumes mutation of X  
-
-Due to dynamic nature\dots
 \section{Scenario Generation}
 
-In order to generated scenarios in Gherkin, interactions can be sliced in a similar manner as described by \textcite{zhang2019scenario} and summarized in \ref{intro:zhang_interaction_diagrams}.
+In order to generate scenarios in Gherkin, interactions can be sliced in a similar manner as described by \textcite{zhang2019scenario} and summarized in \ref{intro:zhang_interaction_diagrams}.
 
 Let $N$ denote the set of all nodes in the graph and $E$ denote all edges in the graph. Let $n \in N$, $m \in N$ be any two nodes in the graph and let $(n, m) \in E $ represent an edge from $n$ to $m$. Let $type(n)$ be a function, that returns the type of a node and $label(n, m)$ be a function that returns the label of the edge from $n$ to $m$. Let $E_{out}(n)$ be a function, which returns all outgoing edges of $n$.
 Let $E_{in}(n)$ be a function, which returns all incoming edges to $n$.
@@ -292,8 +282,6 @@ When - $n_k$
 Then - $l(n_k)$
 
 
-
-%TODO displaying objects, bonus che se vijda tochno koe property se updateva 
 
 
 %TODO in assumptions no nested lists
