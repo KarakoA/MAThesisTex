@@ -162,10 +162,12 @@ Edges in the graph are directed and each have a label property, which is one of 
 \subsection{Variable Identifiers}
 \label{concept:variable_identifiers}
 Variable identifiers are represented by \astnode{identifier} and \astnode{thisIdentifier} in the \gls{ast} \ref{ast}. For the \astnode{this} and for each \astnode{id} node in the \astnode{identifier} or \astnode{thisIdentifier} a vertex is created in order. 
-Those vertices are connected using unidrection edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous.
+Those vertices are connected using unidrection edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous. There is one exception to this process - When accessed from \astnode{write} of a \code{method}, nodes of type \astnode{GENERIC_INDEX} are omitted. The reason behind this will be explained in this section \ref{concept:why_create_list};
+
+
 
 Each vertex has a \gls{guid} equal to the value of its terminal symbol (\astnode{NUMERIC_INDEX}, \astnode{GENERIC_INDEX} or \astnode{NAME_IDENTIFIER}), concatenated with the value of the previous vertix.
-The \code{label} of those vertices are equal to the terminal symbol in case of \astnode{NAME_IDENTIFIER} and in case of \astnode{GENERIC_INDEX} and \astnode{NUMERIC_INDEX}, combined with the \code{label} of the previous vertex using square braces.  Set the type of each vertex to 'data'.
+The \code{label} of those vertices are equal to the terminal symbol in case of \astnode{NAME_IDENTIFIER} and in case of \astnode{GENERIC_INDEX} and \astnode{NUMERIC_INDEX}, combined with the \code{label} of the previous vertex using square braces. Set the type of each vertex to 'data'. Add the type 'numeric' to vertices created from \astnode{NUMERIC_INDEX} nodes and 'generic' to vertices created from \astnode{GENERIC_INDEX} nodes. 
 
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_simple.png}
@@ -183,7 +185,10 @@ Using the representation for identifiers in the previous section, objects will r
      \label{fig:graph_object}
 \end{figure}
 
-Furthermore, updates can be formulated nicely with the above representation. If \code{problem} were to be changed, it would result in a cascade update of all properties. If \code{author} would be change, it would only result in a cascading change in \code{name}. \subsection{List representation}
+Furthermore, updates can be formulated nicely with the above representation. If \code{problem} were to be changed, it would result in a cascade update of all properties. If \code{author} would be change, it would only result in a cascading change in \code{name}. 
+
+\subsection{List representation}
+\label{concept:list_creation}
 
 Lists will be represented based on the principle shown in \ref{fig:graph_list_generic} for a list named $P$.  
 \begin{figure}[H]
@@ -192,7 +197,7 @@ Lists will be represented based on the principle shown in \ref{fig:graph_list_ge
      \label{fig:graph_list_generic}
 \end{figure}
 
-Concrete elements, which are accessed, are detoned as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be updated to all elements of a list and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
+Concrete elements, which are accessed, are detoned as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be used to update all elements of a list\label{concept:why_create_list} and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
 
 
 The same construct can be leveraged also when it comes to properties of list elements and will be described in more detail in %TODO add the image and add this below as an example
@@ -223,7 +228,7 @@ Finally the process described in this section is repeated recursively for each \
 \subsubsection{Computed property representation}
 \label{concept:computed_property}
 
-%TODO image, y/n?
+Computed properties are represented similarly to methods. They cannot have arguments, so no subsitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
 
 \subsubsection{Combining it all together}
 
@@ -247,10 +252,27 @@ C) If the binding type is two-way, create both edges - A) and B).
 
 For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads}, \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
 
+
+Once all of the above is done, additional edges will need to be added for the \textit{all} vertices of properties of elements inside lists \ref{concept:list_creation}. Also the edges to the \textit{any} vertex will be missing. 
+
+'numeric' vertices to the 'generic' one. 
+
+This is achievable by first finding all vertices of type 'generic' or 'numeric' and obtaining the parent of each of them. Those parents form a subset of all vertices, that have have 'generic' or 'numeric' vertices as children and adittionaly other properties (properties on list elements, with $type(v) \neq generic, type(v) \neq numeric$). 
+For each of those parent vertices $p$:
+Firstly, connect each 'numeric' vertex to the 'generic' one. Recursively connect each child in the tree of the 'numeric' vertex to the child of the tree of the 'generic' vertex with the same name. If either does not exist, no edge is created. Do the same for $p$ and all 'numeric' vertices and the 'generic' vertex.
+
+\begin{figure}[H]
+    \includegraphics[width=0.8\textwidth]{images/graph_complete_example.png}
+     \caption{Example Graph including list elements with properties}
+     \label{fig:graph_object}
+\end{figure}
+
+%TODO describe this and also verify above
+
 %TODO example of all edge types simple?
 
 \section{Scenario Generation}
-
+%TODO fix...
 In order to generate scenarios in Gherkin, interactions can be sliced in a similar manner as described by \textcite{zhang2019scenario} and summarized in \ref{intro:zhang_interaction_diagrams}.
 
 Let $N$ denote the set of all nodes in the graph and $E$ denote all edges in the graph. Let $n \in N$, $m \in N$ be any two nodes in the graph and let $(n, m) \in E $ represent an edge from $n$ to $m$. Let $type(n)$ be a function, that returns the type of a node and $label(n, m)$ be a function that returns the label of the edge from $n$ to $m$. Let $E_{out}(n)$ be a function, which returns all outgoing edges of $n$.
@@ -292,3 +314,8 @@ Then - $l(n_k)$
 
 % FAZIT
 % TODO assumes reads, would have been better treat as anonymous method
+
+
+
+
+%lists better explain, generic acts as the any, etc
