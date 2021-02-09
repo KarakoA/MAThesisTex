@@ -309,6 +309,14 @@ Lastly in the \code{addEdgesForLists} method additional edges will be added for 
 \section{Scenario Generation}
 The scenario generation is implemented in the \code{scenario.ts} file and currently ouputs the obtained scenarios, tags, nodes react to and the gherkin scenarios templates to the console. The scenarios are generated exactly as described in \ref{concept:scenario_generation}
 
+\section{Display of Interaction Diagram}
+In order to display the interaction diagrams it is displayed on a single html page, utilizing the d3-graphviz \parencite{graph_viz} library. 
+
+Event edges are displayed as thick bold lines, calls edges are displayed as solid lines and all other as dashed lines.
+
+Html tags are separated from all other nodes in a subgraph in order to be able to more easily identify them. In addition to their name, they also include the line(s) on which they are in the source code as a subline. The initial function has a grey background so it can be identified right away.
+A button to download the displayed diagram as a \code{.png} image is also provided in the top left.
+
 \section{Usage}
 The application can be started using
 %lang bash
