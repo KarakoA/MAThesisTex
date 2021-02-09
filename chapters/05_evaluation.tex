@@ -63,6 +63,11 @@ $l(add_problem() = {Check, Right, Wrong, a, b, answer })$ since the answer prope
 
 One could argue, that the version in \parencite{zhang2019scenario} is correct, since $answer$ is set to $undefined$, which is the same as the initial value of the variable, so it would not trigger an update as part of the \code{init} method. The interaction diagram generator does not perform this check. If $l(add_problem())$ were to be called later in the application (when the $New Problem$ button is clicked) it would indeed set a new value to $answer$, which is correctly reflected by \textcite{zhang2019scenario}.
 
+
+\subsection{Scenarios}
+The following Gherkin scenarios of up to 4 elements are generated. The program outputs this as plain text to the console, but here they are displayed in a nicer way.
+
+
 \section{Diagram with list}
 which can be found in \code{resources/test-files/list.vue}
 \begin{figure}[H]
@@ -70,7 +75,6 @@ which can be found in \code{resources/test-files/list.vue}
      \caption{TODO}
      \label{fig:diagram_list}
 \end{figure}
-% answer, right and a,b,c are updated in init
 
 % \section{Diagram Addition and Substitution}
 % \begin{figure}[H]
