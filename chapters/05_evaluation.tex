@@ -4,14 +4,64 @@
 3. complex list(add, sub) with focus on updates
 
 \section{Scenario}
-%\textcite{zhang2019scenario} 
-\section{Simple Diagram with no lists}
-which can be found in \code{resources/test-files/test.vue}
+\textcite{zhang2019scenario} use an example of a small \gls{spa} titled "Math for kids", which generates simple math addition problems and keeps track of a small statistic, which includes the number of correctly and incorrectly answered problems. The same application has been implemented and extended in Vue.js and will be used to display the capabities of the interaction diagram and scenario generation application.
+\section{Math for Kids}
+
 \begin{figure}[H]
-    \includegraphics[width=\textwidth]{images/diagram_test_zhang.png}
-     \caption{TODO }
-     \label{fig:diagram_test_zhang}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+         \includegraphics[width=0.45\textwidth]{images/math_for_kids_zhang.png}
+         \caption{Math for Kids in AngularJS by \textcite{zhang2019scenario}}
+         \label{fig:evaluation_math_kids_zhang}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.45\textwidth]{images/math_for_kids_own.png}
+        \caption{Own implementation of Math for Kids in Vue.js}
+        \label{fig:evaluation_math_kids_own}
+    \end{subfigure}
 \end{figure}
+
+The source code can be found in \code{resources/test-files/test.vue} and also in \ref{appendix:math_kids_basic_source_code}.
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/diagram_own_math_kids.png}
+     \caption{Math for Kids in Vue.js generated interaction diagram }
+     \label{fig:math_for_kids_own_interaction_diagram}
+\end{figure}
+
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/interaction_diagram_zhang.png}
+     \caption{Math for Kids in AngularJS interaction diagram by \textcite{zhang2019scenario}}
+     \label{fig:math_for_kids_zhang_interaction_diagram}
+\end{figure}
+
+When comparing the generated diagram\ref{fig:math_for_kids_own_interaction_diagram} to the original by \textcite{zhang2019scenario} \ref{fig:math_for_kids_zhang_interaction_diagram} there are some differences.
+
+Due to different modelling there is a \code{this} vertex and connections from it to top level variables, which does not exist in the diagram by \textcite{zhang2019scenario}. In the generated diagram there is an edge of type 'event' between the \textit{answer} tag and \textit{answer} property. This is due to the way that two-way bindings were decided to be represented.
+
+There are two differences between the \textit{add\_problem} node in the generated diagram and the one by \textit{zhang2019scenario}.
+In \textcite{zhang2019scenario} there is an edge from
+the \textit{add\_problem} method to the \textit{New Problem} tag, which is missing in the own generated version. This seems like a mistake in \parencite{zhang2019scenario}, since this edge should not exist.
+
+The other difference is that in \parencite{zhang2019scenario} there is no edges from \textit{add\_problem} to \textit{right} (write relation), however there should be, 
+inside \textit{add\_problem} \code{this.right = undefined}.
+
+\begin{lstlisting}
+l(created) -> a, b, answer, Check, Right, Wrong
+l(answer) -> answer, Check
+l(Check) -> Right, Wrong, Check, count_right, count_wrong
+l(New Problem) -> a, b, answer, Check, Right, Wrong
+\end{lstlisting}
+
+The generated reaction based on the graph differ for $l(created)$, all other sets are exactly the same as the ones by \textcite{zhang2019scenario} (albeit in different order). This may stem from the fact that the edges of \textit{add\_problem} to \code{\$scope.right} is missing in \parencite{zhang2019scenario}, however it is later correctly factored in $l(New Problem)$.
+
+\textcite{zhang2019scenario} define $l(add_problem())$ 
+(the equivalent of $l(created)$) as $l(add_problem() = 
+{a, b})$ where it should be 
+$l(add_problem() = {Check, Right, Wrong, a, b, answer })$ since the answer property is updated based on the diagram. 
+
+One could argue, that the version in \parencite{zhang2019scenario} is correct, since $answer$ is set to $undefined$, which is the same as the initial value of the variable, so it would not trigger an update as part of the \code{init} method. The interaction diagram generator does not perform this check. If $l(add_problem())$ were to be called later in the application (when the $New Problem$ button is clicked) it would indeed set a new value to $answer$, which is correctly reflected by \textcite{zhang2019scenario}.
 
 \section{Diagram with list}
 which can be found in \code{resources/test-files/list.vue}
@@ -20,198 +70,14 @@ which can be found in \code{resources/test-files/list.vue}
      \caption{TODO}
      \label{fig:diagram_list}
 \end{figure}
-\begin{lstlisting}
-l(answer) -> answer, Check
-l(Check) -> Right, Wrong, Check, count_right, count_wrong
-l(New Problem) -> a, b, answer, Check, Right, Wrong
-l(created) -> a, b, answer, Check, Right, Wrong
+% answer, right and a,b,c are updated in init
 
-Unique scenarios (A) of up to 4 elements:
-[
-[ 'created' ],
-[ 'created', 'answer' ],
-[ 'created', 'Check' ],
-[ 'created', 'New Problem' ],
-[ 'created', 'answer', 'Check' ],
-[ 'created', 'New Problem', 'answer' ],
-[ 'created', 'New Problem', 'Check' ],
-[ 'created', 'New Problem', 'answer', 'Check' ]
-]
-Scenario: ['created']
-When 'created'
-Then 'a'
-And 'b'
-And 'answer'
-And 'Check'
-And 'Right'
-And 'Wrong'
-
-Scenario: ['created', 'answer']
-Given 'created'
-When 'answer'
-Then 'answer'
-And 'Check'
-
-Scenario: ['created', 'Check']
-Given 'created'
-When 'Check'
-Then 'Right'
-And 'Wrong'
-And 'Check'
-And 'count_right'
-And 'count_wrong'
-
-Scenario: ['created', 'New Problem']
-Given 'created'
-When 'New Problem'
-Then 'a'
-And 'b'
-And 'answer'
-And 'Check'
-And 'Right'
-And 'Wrong'
-
-Scenario: ['created', 'answer', 'Check']
-Given 'created'
-And 'answer'
-When 'Check'
-Then 'Right'
-And 'Wrong'
-And 'Check'
-And 'count_right'
-And 'count_wrong'
-
-Scenario: ['created', 'New Problem', 'answer']
-Given 'created'
-And 'New Problem'
-When 'answer'
-Then 'answer'
-And 'Check'
-
-Scenario: ['created', 'New Problem', 'Check']
-Given 'created'
-And 'New Problem'
-When 'Check'
-Then 'Right'
-And 'Wrong'
-And 'Check'
-And 'count_right'
-And 'count_wrong'
-
-Scenario: ['created', 'New Problem', 'answer', 'Check']
-Given 'created'
-And 'New Problem'
-And 'answer'
-When 'Check'
-Then 'Right'
-And 'Wrong'
-And 'Check'
-And 'count_right'
-And 'count_wrong'
+% \section{Diagram Addition and Substitution}
+% \begin{figure}[H]
+%     \includegraphics[width=\textwidth]{images/diagram_list_add_sub.png}
+%      \caption{TODO }
+%      \label{fig:diagram_test_add_sub}
+% \end{figure}
 
 
-\end{lstlisting}
-
-\begin{lstlisting}
-l(problems[i].answer) -> problems[i].answer, Check
-l(Check) -> Right, Wrong, Check, count_right, accuracy, count_wrong
-l(New Problem) -> problems[i].a, problems[i].b, problems[i].answer, Check, Right, Wrong, First Problem
-l(created) -> problems[i].a, problems[i].b, problems[i].answer, Check, Right, Wrong, First Problem
-
-Unique scenarios (A) of up to 4 elements:
-[
-    [ 'created' ],
-    [ 'created', 'problems[i].answer' ],
-    [ 'created', 'Check' ],
-    [ 'created', 'New Problem' ],
-    [ 'created', 'problems[i].answer', 'Check' ],
-    [ 'created', 'New Problem', 'problems[i].answer' ],
-    [ 'created', 'New Problem', 'Check' ],
-    [ 'created', 'New Problem', 'problems[i].answer', 'Check' ]
-]
-Scenario: ['created']
-    When 'created'
-    Then 'problems[i].a'
-    And 'problems[i].b'
-    And 'problems[i].answer'
-    And 'Check'
-    And 'Right'
-    And 'Wrong'
-    And 'First Problem'
-
-Scenario: ['created', 'problems[i].answer']
-    Given 'created'
-    When 'problems[i].answer'
-    Then 'problems[i].answer'
-    And 'Check'
-
-Scenario: ['created', 'Check']
-    Given 'created'
-    When 'Check'
-    Then 'Right'
-    And 'Wrong'
-    And 'Check'
-    And 'count_right'
-    And 'accuracy'
-    And 'count_wrong'
-
-Scenario: ['created', 'New Problem']
-    Given 'created'
-    When 'New Problem'
-    Then 'problems[i].a'
-    And 'problems[i].b'
-    And 'problems[i].answer'
-    And 'Check'
-    And 'Right'
-    And 'Wrong'
-    And 'First Problem'
-
-Scenario: ['created', 'problems[i].answer', 'Check']
-    Given 'created'
-    And 'problems[i].answer'
-    When 'Check'
-    Then 'Right'
-    And 'Wrong'
-    And 'Check'
-    And 'count_right'
-    And 'accuracy'
-    And 'count_wrong'
-
-Scenario: ['created', 'New Problem', 'problems[i].answer']
-    Given 'created'
-    And 'New Problem'
-    When 'problems[i].answer'
-    Then 'problems[i].answer'
-    And 'Check'
-
-Scenario: ['created', 'New Problem', 'Check']
-    Given 'created'
-    And 'New Problem'
-    When 'Check'
-    Then 'Right'
-    And 'Wrong'
-    And 'Check'
-    And 'count_right'
-    And 'accuracy'
-    And 'count_wrong'
-
-Scenario: ['created', 'New Problem', 'problems[i].answer', 'Check']
-    Given 'created'
-    And 'New Problem'
-    And 'problems[i].answer'
-    When 'Check'
-    Then 'Right'
-    And 'Wrong'
-    And 'Check'
-    And 'count_right'
-    And 'accuracy'
-    And 'count_wrong'
-\end{lstlisting}
-
-
-\section{Diagram Addition and Substitution}
-\begin{figure}[H]
-    \includegraphics[width=\textwidth]{images/diagram_list_add_sub.png}
-     \caption{TODO }
-     \label{fig:diagram_test_add_sub}
-\end{figure}
+%TODO link to https://github.com/KarakoA/vuejs-example and say examples can be deployed there
