@@ -1,6 +1,10 @@
 \section{Project Structure and Overview}
 The application is written mostly in TypeScript using npm as a package manager and Node.js as a runtime environment. 
 
+
+
+
+%TODO eslint only js thats why no ts. at intro probably
 Notable dependencies are TypeScript, for stricter syntax and types, lodash for enrichening of collections, babel as a transcompiler, eslint, estree and eslint-plugin-vue for parsing Vue.js code, d3-graphviz in comination with light-server for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
 %TODO cite all of those directly?
 
@@ -42,68 +46,92 @@ The \code{scripts} directory includes helper bash scripts, \code{results} holds 
 
 \section{Parsing Vue.js}
 
-Instead of implementing a parser, which directly outputs the simplfied Vue.js \gls{ast} described in \ref{ast} the capabilities of \textcite{eslint}  %TODO add cit
+Instead of implementing a parser, which directly outputs the simplfied Vue.js \gls{ast} described in \ref{ast} the capabilities of \textcite{eslintMainPage}  %TODO add cit
 and \parencite{eslint_vue_parser} were used. 
 The source files, which handle the parsing reside in the \code{parsing} directory.
-The file \code{eslinter.ts} provides a wrapper around the ESLint Node.js API of eslint. Custom visitors were implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method defintions, computed properties and init.
+The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. Custom visitors are implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method defintions, computed properties and the created method.
 
 \subsection{Top Level Properties}
-The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} tag of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
+The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} object  of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
+
 %TODO lang
+\label{impl:top_level_select}
 \begin{lstlisting}
-"Property[key.name = data] ReturnStatement > ObjectExpression"(node){
+
+"ExportDefaultDeclaration > ObjectExpression > 
+Property[key.name = data] ReturnStatement > ObjectExpression"(node){
   ...
 }
 \end{lstlisting}
-For each of its properties \ref{eslint:property} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression} \ref{eslint:object_expression}) it is already concatenated with the previously obtained key. Finally all properties are prefixed with 'this'.  
+In natural language the selector reads: "Select ObjectExpression nodes, which have a direct parent ReturnStatement, that has an indirect parent Property with a property \code{key.name} equal to \code{data} and a direct parent ObjectExpression with a direct parent ExportDefaultDeclaration.
+
+For each of the properties \ref{eslint:property} of the \code{ObjectExpression} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression} \ref{eslint:object_expression}) it is concatenated with the previously obtained key. Finally all obtained properties are prefixed with 'this'.
 
 \subsection{Bindings}
 The ESlint \gls{ast} nodes, which are interesting when parsing the bindings are \code{VElement} \ref{eslint:velement}, 
 \code{Identifier} \ref{eslint:identifier}, \code{MemberExpression} \ref{eslint:member_expression} and \code{CallExpression} \ref{eslint:call_expression}. 
 
-A property identifier can be a single \code{Identifier} or a \code{MemberExpression}, which can contain other \code{Identifier} nodes or \code{MemberExpression} nodes. Property Identifiers are extracted by 
+A \astnode{identifier} \ref{ast}, abstracted
+in \code[]{common/identifier.ts}  can be a single \code{Identifier} or a \code{MemberExpression}, which can contain other \code{Identifier} nodes or \code{MemberExpression} nodes. Property Identifiers are extracted by finding the root \code{MemberExpression} or \code{Identifier} and traversing it. It is easy to determine if a \code{MemberExpression} or \code{Identifier} is the root - its parent is anything but a \code{MemberExpression}.
 
-\code{VElement} nodes represent any HTML tag. Whenever any ends
+A \code{CallExpression} contains information about the name of the method and the arguments it has been called with, both in the form of nested \code{MemberExpression} and \code{CallExpression} nodes. Once again, only the root \code{CallExpression} node is extracted and converted to a \astnode{calledMethod} \ref{ast}, abstracted in the \code{Method} interface in \code{shared.ts}.
 
+\code{VElement} nodes represent any HTML tag, matching a \astnode{tag} \ref{ast} abstracted in the \code{Tag} interface in code{template-bindings.ts} and contain information about the location of the tag and potentially a \code{VText} \ref{eslint:vtext} node, which will be set as its name if it is present. If not present, the name of the tag is equal to the name of the first binding. Therefore, information about tags is extracted once a \code{VELement} is exited, since all bindings will be known at this point.
 
+Further, the binding type has to be determined. This can be extracted based on the \code{VAttribute} \ref{eslint:VAttribute}. Event bindings have a \code{VAttribute} with a \code{key.name.name} equal to 'on', two-way bindings equal to 'model' and everything else is interpreted as one-way bindings. This includes moustache statements, \code{v-bind}, \code{v-if} bindings and all other except \code{v-for} statements. This filter be achieved via the powerful \code{:not} in combination with \code{:matches} selectors: 
+%TODO lang
+\begin{lstlisting}
+:not(:matches(
+  VAttribute[key.name.name=on], 
+  VAttribute[key.name.name=model],
+  VAttribute[key.argument.name=key],
+  VAttribute[key.name.name=for]))
+\end{lstlisting}
 
-"VAttribute[key.name.name=on] > VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
-  node
-) {
+With all the above, for example to match all two-way bindings and pass them on to the builder can be done via 
+\begin{lstlisting}
+  
+"VAttribute[key.name.name=model] > VExpressionContainer
+:matches(MemberExpression, Identifier, CallExpression)"(
+  node) {
+  if (utils.isRootNameOrCallExpression(node) && 
+  utils.notArgument(node))
+    builder.identifierOrExpressionNew(node, BindingType.TWO_WAY);
+},
+\end{lstlisting}
 
-Two-way
-"VAttribute[key.name.name=model] > VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
-  node
-) 
+%TODO note why not args - method knows exactly what part
 
-//other identifiers
-":not(:matches(VAttribute[key.name.name=on], VAttribute[key.name.name=model],VAttribute[key.argument.name=key], VAttribute[key.name.name=for])) >  VExpressionContainer :matches(MemberExpression, Identifier, CallExpression)"(
-  node
-% ) {
-%   if (utils.isRootNameOrCallExpression(node) && utils.notArgument(node))
-%     builder.identifierOrExpressionNew(node, BindingType.ONE_WAY);
-% },
+Bindings also need to substitute \code{v-for} statements. This is done by substituting the left side of the \code{v-for} statement with its right side and a generic index in all bindings that use it.
 
-
-vfor containing
-
-velement exited
 \subsection{Method Definitions}
 
-eslint -> ast defined previously
+All method definition like structures (computed properties, created) and methods are parsed by the visitor defined in \code{methods.js}.
+Analogous to how the top level \code{data} object is selected \ref{impl:top_level_select}, the \code{methods}, \code{created} and \code{computed} objects can be selected. 
+The name of the method including its arguments can be extracted from by \code{Property[value.type=FunctionExpression]} nodes. Using this information, one can have three selectors, one of each type, to determine what is being defined. For example for regular methods:
+ 
+\begin{lstlisting}
 
-wrappper eslinter
-- eslinter (encapsulate eslint, wrapper)
-- visitors (using selectors extract)
-- builders transformation 
+"ExportDefaultDeclaration > ObjectExpression > Property
+[key.name = methods] Property[value.type=FunctionExpression]"(node) {
+  builder.newMethod(node, MethodType.METHOD);
+},
+\end{lstlisting}
 
-how what captured in detail
+Further the properties read, written and methods called need to be extracted. Methods called can be obtained by selecting \code{CallExpression} nodes. Properties written to can be obtained from the left side of a \code{AssignmentExpression} \ref{eslint:AssignmentExpression}.
+There does not seem be an easy way to select all properties read from. Therefore all accesed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from.
 
-- builders transformation 
-wrapper
+The following code can be used to obtain all variables written to by the current method-like in scope. 
+\begin{lstlisting}
+"ExportDefaultDeclaration > ObjectExpression > 
+:matches(Property[key.name = methods], Property[key.name = created],
+Property[key.name = computed]) AssignmentExpression"(node) {
+  builder.identifierOrExpressionNew(node.left, AccessType.WRITES);
+},
+\end{lstlisting}
 
-
-not exact by types, more general, handled by eslint. also the assumption that code good 
+%TODO about the datatypes generated by different things?
+%absolutely.. sadly need to, but will be good 
 \section{Interaction Diagram Generation}
 The algorithm for generated interaction diagrams described in the previous section.. is implemented in the 
 - as described in concept

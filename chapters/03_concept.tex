@@ -1,5 +1,3 @@
-%TODO intro
-
 \section{Parsing Vue.js}
 
 \subsection{Assumptions}
@@ -9,11 +7,11 @@ It is assumed that the Vue.js code, for which interaction diagrams are going to 
 
 In order to be able to generate interaction diagrams, which capture every aspect of Vue.js, the generation must be directly based on an \gls{ast}, which covers every possible syntax, such as \cite{eslint_vue_parser}. 
 
-This thesis only includes the following features of Vue.js:
+The approach proposed here only includes the following features of Vue.js:
 \begin{itemize}
     \item Event handlers (including anonymous method syntax and method reference syntax)
     \item Any one or two-way binding expressions (\code{v-model}, \code{v-bind}, "moustache", \code{v-if}) excluding \code{v-else}
-    \item nested \code{v-for} statements for lists, excluding iterating through properties of an object or iteration with index (property zipped with index)
+    \item \code{v-for} statements for lists, excluding iterating through properties of an object or iteration with index (property zipped with index)
     \item distinguishing between properties and computed properties
     \item complex object and lists (non-nested) models 
     \item methods, including the resolution of arguments, they have been called with (excluding methods called with other methods as arguments)
@@ -22,55 +20,62 @@ This thesis only includes the following features of Vue.js:
 \subsection{AST}
 
 \begin{lstlisting}[style=antrl]
-grammar js_simplified;
+    grammar vue_simple;
 
-program: bindings methodDefinitions createdMethod topLevelProperties computedProperties;
-
-topLevelProperties: thisIdentifier*;
-methodDefinitions: methodDefinition*; 
-createdMethod: methodDefinition;
-computedProperties: (thisIdentifier reads writes calls)*;
-
-methodDefinition: thisIdentifier methodArgs reads writes calls;
-
-methodArgs: NAME_IDENTIFIER*;
-reads: accesedVariable*;
-writes: accesedVariable*;
-calls: calledMethod*;
-
-calledMethod: calledMethodIdentifier '(' calledArgs ')';
-accesedVariable: identifier;
-calledArgs: (calledMethod | accesedVariable)*;
-
-bindings: binding*;
-binding: tag accesedVariable | calledMethod BINDING_TYPE;
-
-tag: name tagId loc;
-tagId: LINE '_' COLUMN '_' LINE '_' COLUMN;
-name: UNICODE | identifier;
-loc: start end;
-start: LINE COLUMN;
-end: LINE COLUMN;
-
-calledMethodIdentifier: THIS id* NAME_IDENTIFIER | id* NAME_IDENTIFIER;
-
-thisIdentifier: THIS identifier;
-identifier: NAME_IDENTIFIER id*;
+    program: bindings methodDefinitions createdMethod topLevelProperties computedProperties;
     
-id: NUMERIC_INDEX | GENERIC_INDEX | NAME_IDENTIFIER;
-
-//terminals, tokens
-LINE: [0-9]+;
-COLUMN: [0-9]+;
-
-BINDING_TYPE: 'event' | 'one-way' | 'two-way';
-GENERIC_INDEX: 'i' | 'j' | 'k' | 'l' | 'm' | 'n';
-THIS: 'this';
-
-NUMERIC_INDEX: [0-9];
-NAME_IDENTIFIER:  JS_IDENTIFIER;
-JS_IDENTIFIER:  (UNICODE | '$' | '_') (UNICODE | '$' | '_' | [0-9])*;
-UNICODE: [\u0000-\uFFFF];
+    topLevelProperties: thisIdentifier*;
+    methodDefinitions: methodDefinition*; 
+    createdMethod: methodDefinition;
+    computedProperties: (methodDefinitionIdentifier reads writes calls)*;
+    
+    methodDefinition: methodDefinitionIdentifier methodArgs reads writes calls;
+    
+    methodArgs: NAME_IDENTIFIER*;
+    reads: accesedVariable*;
+    writes: accesedVariable*;
+    calls: calledMethod*;
+    
+    calledMethod: calledMethodIdentifier '(' calledArgs ')';
+    accesedVariable: identifier;
+    calledArgs: (calledMethod | accesedVariable)*;
+    
+    bindings: binding*;
+    binding: tag bindingSource+;
+    bindingSource: (accesedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING)
+                  | accesedVariable TWO_WAY_BINDING;
+    
+    tag: name tagId loc;
+    tagId: LINE '_' COLUMN '_' LINE '_' COLUMN;
+    name: UNICODE | identifier;
+    loc: start end;
+    start: LINE COLUMN;
+    end: LINE COLUMN;
+    
+    calledMethodIdentifier: methodDefinitionIdentifier | id* NAME_IDENTIFIER;
+    
+    methodDefinitionIdentifier: THIS NAME_IDENTIFIER;
+    thisIdentifier: THIS identifier;
+    identifier: NAME_IDENTIFIER id*;
+    
+    
+    id: NUMERIC_INDEX | GENERIC_INDEX | NAME_IDENTIFIER;
+    
+    //terminals, tokens
+    LINE: [0-9]+;
+    COLUMN: [0-9]+;
+    
+    EVENT_BINDING: 'event';
+    TWO_WAY_BINDING: 'two-way';
+    ONE_WAY_BINDING: 'one-way';
+    
+    GENERIC_INDEX: 'i' | 'j' | 'k' | 'l' | 'm' | 'n';
+    THIS: 'this';
+    
+    NUMERIC_INDEX: [0-9]+;
+    NAME_IDENTIFIER:  JS_IDENTIFIER;
+    JS_IDENTIFIER:  (UNICODE | '$' | '_') (UNICODE | '$' | '_' | [0-9])*;
+    UNICODE: [\u0000-\uFFFF];
 \end{lstlisting}
 \label{ast}
 
@@ -136,7 +141,7 @@ Each tag includes its location in the source code (starting and ending line and 
     \item calls - method calls, including arguments, same as for bindings 
 \end{itemize}
 
-\code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practise, it is still possible for computed properties to have side effects and therefore it was decided to model them as methods.
+\code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practise, it is still possible for computed properties to have side effects and therefore they were modelled as methods.
 
 %TODO explain compound etc graph in intro?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,11 +164,12 @@ Vertices in this graph have the following properties
 
 Edges in the graph are directed and each have a label property, which is one of 'event', 'calls' or 'simple'. 
 
+The core idea of the algorithm is to generate vertices only for nodes which are being accessed instead of the whole application. A second pass of the data is also needed to add additional edges for lists. 
+
 \subsection{Variable Identifiers}
 \label{concept:variable_identifiers}
 Variable identifiers are represented by \astnode{identifier} and \astnode{thisIdentifier} in the \gls{ast} \ref{ast}. For the \astnode{this} and for each \astnode{id} node in the \astnode{identifier} or \astnode{thisIdentifier} a vertex is created in order. 
 Those vertices are connected using unidrection edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous. There is one exception to this process - When accessed from \astnode{write} of a \code{method}, nodes of type \astnode{GENERIC_INDEX} are omitted. The reason behind this will be explained in this section \ref{concept:why_create_list};
-
 
 
 Each vertex has a \gls{guid} equal to the value of its terminal symbol (\astnode{NUMERIC_INDEX}, \astnode{GENERIC_INDEX} or \astnode{NAME_IDENTIFIER}), concatenated with the value of the previous vertix.
@@ -181,7 +187,7 @@ Using the representation for identifiers in the previous section, objects will r
 
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_object.png}
-     \caption{Example Graph generated obtained for the following object accesses - \code{this.problem.a}, \code{this.problem.b},  \code{this.problem.author.name} }
+     \caption{Example Graph for the following object accesses - \code{this.problem.a}, \code{this.problem.b},  \code{this.problem.author.name} }
      \label{fig:graph_object}
 \end{figure}
 
@@ -190,7 +196,7 @@ Furthermore, updates can be formulated nicely with the above representation. If 
 \subsection{List representation}
 \label{concept:list_creation}
 
-Lists will be represented based on the principle shown in \ref{fig:graph_list_generic} for a list named $P$.  
+Lists will be represented based on the template in \ref{fig:graph_list_generic} for a list named $P$.  %TODO for alist named $P$ don\tlike this
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_list_generic.png}
      \caption{Generic List representation}
@@ -199,8 +205,7 @@ Lists will be represented based on the principle shown in \ref{fig:graph_list_ge
 
 Concrete elements, which are accessed, are detoned as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be used to update all elements of a list\label{concept:why_create_list} and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
 
-
-The same construct can be leveraged also when it comes to properties of list elements and will be described in more detail in %TODO add the image and add this below as an example
+The same construct can also be leveraged when it comes to properties of list elements. Each top level property of that element will have an $all$ vertex, connected to the $P_{all}$ node of the list.  
 
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_list.png}
@@ -228,7 +233,7 @@ Finally the process described in this section is repeated recursively for each \
 \subsubsection{Computed property representation}
 \label{concept:computed_property}
 
-Computed properties are represented similarly to methods. They cannot have arguments, so no subsitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
+Computed properties are represented similarly to methods, except they cannot have arguments, so no subsitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
 
 \subsubsection{Combining it all together}
 
@@ -264,18 +269,15 @@ Firstly, connect each 'numeric' vertex to the 'generic' one. Recursively connect
 \begin{figure}[H]
     \includegraphics[width=0.8\textwidth]{images/graph_complete_example.png}
      \caption{Example Graph including list elements with properties}
-     \label{fig:graph_object}
+     \label{fig:graph_complete_example}
 \end{figure}
 
 %TODO describe this and also verify above
-
-%TODO example of all edge types simple?
-
 \section{Scenario Generation}
 %TODO fix...
 In order to generate scenarios in Gherkin, interactions can be sliced in a similar manner as described by \textcite{zhang2019scenario} and summarized in \ref{intro:zhang_interaction_diagrams}.
 
-Let $N$ denote the set of all nodes in the graph and $E$ denote all edges in the graph. Let $n \in N$, $m \in N$ be any two nodes in the graph and let $(n, m) \in E $ represent an edge from $n$ to $m$. Let $type(n)$ be a function, that returns the type of a node and $label(n, m)$ be a function that returns the label of the edge from $n$ to $m$. Let $E_{out}(n)$ be a function, which returns all outgoing edges of $n$.
+Let $N$ denote the set of all nodes in the graph and $E$ denote all edges in the graph. Let $n \in N$, $m \in N$ be any two nodes in the graph and $(n, m) \in E $ represent an edge from $n$ to $m$. Let $type(n)$ be a function, that returns the type of a node and $label(n, m)$ be a function that returns the label of the edge from $n$ to $m$. Let $E_{out}(n)$ be a function, which returns all outgoing edges of $n$.
 Let $E_{in}(n)$ be a function, which returns all incoming edges to $n$.
 
 Let $N_I$ denote all nodes, that the user can interact with. A node $n \in N$ is also in $N_I$ if $\exists e \in E_{out}(n)$ where $label(e) = event$. Let $N_H$ denone all html tag nodes. a node $n \in N$ is also in $N_H$ if $type(n) = tag$. 
@@ -290,7 +292,8 @@ Define the HTML tags, to which a scenario reacts, to be equal to the tags to whi
 - $l(A)=l(a_n)$. 
 
 
-The set of scenarios is generated by starting with the initial scenario, containing only the initial function $S_0 = \{(created)\}$. It is then prolonged by all tags $n \in N_I$, representing that the user can click anywhere resulting in $N_I$ scenarios of length 2. Scenarios of length 3 are generated by taking the previous ones of length 2 $S_2$ and for each scenario $S in S_2$ generate up to $N_I$ new scenarios by prolonging $S$ with $n | n \in l(S) \cap N_I$
+The set of scenarios is generated by starting with the initial scenario, containing only the initial function $S_0 = \{(created)\}$. It is then prolonged by all tags $n \in N_I$, representing that the user can click anywhere resulting in $N_I$ scenarios of length 2. Scenarios of length 3 are generated by taking the previous ones of length 2 $S_2$ and for each scenario $S \in S_2$ generate up to $N_I$ new scenarios by prolonging $S$ with $n | n \in l(S) \cap N_I$
+TODO better definition (mathematic one and multiple sets, the way done in zhang, is more clear)
 %TODO his def is better.
 This is repeated up to $k$ times, where $k$ is a constant set by the user. Then each set is collapsed(%TODO how
 ) and later only unique interaction are generated.
@@ -298,15 +301,18 @@ This is repeated up to $k$ times, where $k$ is a constant set by the user. Then 
 and prolonging it iteratively by each widget, where the user can take an action.
 
 Gherkin scenarios templated can then be obtained by the following tempalte:
+
 Scenario - $n_0,n_1 \ldots n_k$
+
 Given - $n_0, n_1 \ldots n_{k-1}$
+
 When - $n_k$
+
 Then - $l(n_k)$
 
 
 
-
-%TODO in assumptions no nested lists
+%TODO dynamically and then connect idea
 
 %TODO actually also top level, either remove from code or here descrp
 
