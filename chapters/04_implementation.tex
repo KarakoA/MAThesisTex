@@ -50,8 +50,56 @@ Instead of implementing a parser, which directly outputs the simplfied Vue.js \g
 and \parencite{eslint_vue_parser} were used. 
 The source files, which handle the parsing reside in the \code{parsing} directory.
 The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. Custom visitors are implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method defintions, computed properties and the created method.
+ 
+\subsection{Common Data Types}
+Below are the common data types used by all visitors.
+\begin{lstlisting}
+export type Identifier = This | NameIdentifier | NumericIndex 
+| GenericIndex;
 
+interface BaseIdentifier {
+  readonly name: string;
+}
+export interface This extends BaseIdentifier {
+  name: "this";
+  discriminator: IdentifierType.THIS;
+}
+export interface NumericIndex extends BaseIdentifier {
+  discriminator: IdentifierType.NUMERIC_INDEX;
+}
+export interface GenericIndex extends BaseIdentifier {
+  discriminator: IdentifierType.GENERIC_INDEX;
+}
+export interface NameIdentifier extends BaseIdentifier {
+  discriminator: IdentifierType.NAME_IDENTIFIER;
+}
+\end{lstlisting}
+
+%TODO lang
+\begin{lstlisting} 
+export type Entity = Method | Property;
+
+export interface Property {
+  id: Identifiers;
+  discriminator: EntityType.PROPERTY;
+}
+export interface Method {
+  id: Identifiers;
+  args: ReadonlyArray<Entity>;
+  discriminator: EntityType.METHOD;
+}
+\end{lstlisting}
+Discriminators are used to be able to diferentiate between the types using type guards. The enums themselves are omitted here (\code{IdentifierType}, \code{EntityType}). The definitions here are not exactly the same as in the \gls{ast} \ref{ast} - some constraints are omitted, such as method names having to end on a a \code{NameIdentifier}. This will be given, since the parsed code would be invalid javascript otherwise.
 \subsection{Top Level Properties}
+The result of the top level properties has the following data type.
+\begin{lstlisting}
+export type TopLevelProperties = Array<Property>;
+
+export interface TopLevelPropertiesResult {
+  topLevel: TopLevelProperties;
+}
+\end{lstlisting}
+
 The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} object  of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
 
 %TODO lang
@@ -68,6 +116,30 @@ In natural language the selector reads: "Select ObjectExpression nodes, which ha
 For each of the properties \ref{eslint:property} of the \code{ObjectExpression} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression} \ref{eslint:object_expression}) it is concatenated with the previously obtained key. Finally all obtained properties are prefixed with 'this'.
 
 \subsection{Bindings}
+The result of the bindings visitor has the following data type.
+\begin{lstlisting}
+  export enum BindingType {
+    EVENT = "event", ONE_WAY = "one-way", TWO_WAY = "two-way",
+  }
+  
+  export interface Tag {
+    id: string;
+    loc: Location;
+    name: string;
+    position?: string;
+  }
+  
+  export interface BindingValue {
+    item: Entity;
+    bindingType: BindingType;
+  }
+  
+  export type Binding = { tag: Tag; values: BindingValue[] };
+  export interface BindingsResult {
+    bindings: Binding[];
+  }
+\end{lstlisting}
+
 The ESlint \gls{ast} nodes, which are interesting when parsing the bindings are \code{VElement} \ref{eslint:velement}, 
 \code{Identifier} \ref{eslint:identifier}, \code{MemberExpression} \ref{eslint:member_expression} and \code{CallExpression} \ref{eslint:call_expression}. 
 
@@ -106,6 +178,22 @@ Bindings also need to substitute \code{v-for} statements. This is done by substi
 
 \subsection{Method Definitions}
 
+\begin{lstlisting}
+export interface MethodDefinition {
+  id: Identifiers;
+  args: ReadonlyArray<Property>;
+  reads: ReadonlyArray<Property>;
+  writes: ReadonlyArray<Property>;
+  calls: ReadonlyArray<Method>;
+}
+export type MethodDefinitions = Array<MethodDefinition>;
+
+export interface MethodsResult {
+  init?: MethodDefinition;
+  computed: MethodDefinitions;
+  methods: MethodDefinitions;
+}
+\end{lstlisting}
 All method definition like structures (computed properties, created) and methods are parsed by the visitor defined in \code{methods.js}.
 Analogous to how the top level \code{data} object is selected \ref{impl:top_level_select}, the \code{methods}, \code{created} and \code{computed} objects can be selected. 
 The name of the method including its arguments can be extracted from by \code{Property[value.type=FunctionExpression]} nodes. Using this information, one can have three selectors, one of each type, to determine what is being defined. For example for regular methods:
@@ -129,7 +217,17 @@ Property[key.name = computed]) AssignmentExpression"(node) {
   builder.identifierOrExpressionNew(node.left, AccessType.WRITES);
 },
 \end{lstlisting}
-
+\subsection{Output}
+Combinging all of the above, the following data structure is output.
+\begin{lstlisting}
+export class Result {
+  fileName: string;
+  topLevel: TopLevelPropertiesResult;
+  methods: MethodsResult;
+  bindings: BindingsResult;
+  ...
+}
+\end{lstlisting}
 %TODO about the datatypes generated by different things?
 %absolutely.. sadly need to, but will be good 
 \section{Interaction Diagram Generation}
