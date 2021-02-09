@@ -154,6 +154,7 @@ Each tag includes its location in the source code (starting and ending line and 
 The simplified Vue.js \gls{ast} can be used to create a directed graph, which will represent the interaction diagrams. It is hard to directly generate this graph, therefore the capabilities of a directed, compoundend graph will be leveraged and later on converted to a directed graph. 
 
 Vertices in this graph have the following properties
+\label{concept:interaction_diagram_structure}
 \begin{enumerate}
     \item \gls{guid} - used to reference and globally identify the vertex 
     \item \code{label} - the name of the vertex, which is going to be displayed
@@ -236,6 +237,7 @@ Finally the process described in this section is repeated recursively for each \
 Computed properties are represented similarly to methods, except they cannot have arguments, so no subsitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
 
 \subsubsection{Combining it all together}
+\label{concept:algorithm_create_diagrams}
 
 Interaction diagrams can be generated from the simplfied Vue.js \gls{ast} in the following way:
 

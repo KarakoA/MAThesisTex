@@ -230,24 +230,82 @@ export class Result {
 \end{lstlisting}
 \label{impl:result}
 \section{Interaction Diagram Generation}
-The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{transformer.ts} class. 
-As the underlying structure for the graph   
-The algorithm for generated interaction diagrams described in the previous section.. is implemented in the 
-- as described in concept
-- takes models from previous section
+The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{Transformer} class. 
 
-- method cache to abstarct from being resolved twice
-- method resolver
+The resolution of methods is abstracted in the \code{MethodResolver} class. It produces a 
+\code{ResolvedMethodDefintition} for each called method in bindings and the initial method. In order to prevent duplicate resolution of methods and wasting of resources a \code{MethodCache} is introduced. The \code{Transformer} does not use the \code{MethodResolver} directly, but instead accesses it via the \code{MethodCache}. The cache includes directly called (bound to) and indirectly called (calls of methods), for each of which vertices will have to be created. 
+Each \code{ResolvedMethodDefintition} has the following data type:
+\begin{lstlisting}
+export enum GeneralisedArgument {
+  METHOD = "method",OTHER = "other",
+}
+export type ResolvedArgument =
+  | Property | GeneralisedArgument.METHOD | GeneralisedArgument.OTHER;
+export interface ResolvedMethodDefintition {
+  id: Identifiers;
+  args: ReadonlyArray<ResolvedArgument>;
+  reads: ReadonlyArray<Property>;
+  writes: ReadonlyArray<Property>;
+  calls: ReadonlyArray<CalledMethod>;
+}
+export interface CalledMethod {
+  id: Identifiers;
+  args: ReadonlyArray<ResolvedArgument>;
+}
+\end{lstlisting}
 
-- custom graph type, "create if not exist" 
 
-- for each in init resolve
-- for each in bindings resolve
+As the underlying structure for the graph graphlib is used and wrapped in an own class - \code{ExtendedGraph}. It creates vertices on a 'create if not exist' basis by first looking up to see if the vertex exists in the graph, and if it does, does not add it again. Presence of edges is not checked, if an edge is added again, the previous one is simply overwritten. There can only be one edge per direction between two nodes, since no multigraph is used. Nodes and Edges in the graph have the following structure, as specified in \ref{concept:interaction_diagram_structure}:
 
-- indirectly called in the end %TODO check again
-- add edges for numeric
+%TODO format
+\begin{lstlisting}
+export enum EdgeType {
+  SIMPLE = "simple", EVENT = "event", CALLS = "calls",
+}
+export interface Edge {
+  source: Node;
+  sink: Node;
+  label: EdgeType;
+}
+\end{lstlisting}
+\begin{lstlisting}
+export enum NodeType {
+  TAG = "tag",  DATA = "data", METHOD = "method", INIT = "init",
+}
 
-% 2-3 pages?
+export type Node = TagNode | DataNode | MethodNode | InitNode;
+interface BaseNode {
+  id: string;
+  name: string;
+}
+export interface TagNode extends BaseNode {
+  loc: Location;
+  discriminator: NodeType.TAG;
+}
+export interface MethodNode extends BaseNode {
+  discriminator: NodeType.METHOD;
+}
+export interface InitNode extends BaseNode {
+  discriminator: NodeType.INIT;
+}
+export interface DataNode extends BaseNode {
+  parent?: string;
+  type: IdentifierType;
+  discriminator: NodeType.DATA;
+}
+\end{lstlisting}
+
+
+The algorithm for generating the interaction diagrams graph as described in \ref{concept:algorithm_create_diagrams}
+is implemented in the \code{Transformer} class.
+
+First the init method is resolved by querying the \code{MethodCache} and afterwards each of the bindings. The order is not important. If the bindings are properties, the vertices for them are created directly. If they are methods or computed properties, they are resolved by the \code{MethodCache} and the correct edges based on the binding type created. The above is done in the \code{addInit()} and \code{addBindings()} methods.
+
+At this stage no vertices are created for the reads, writes, and calls properties of the resolved methods. 
+This happens in the \code{addIndirectlyCalledMethods()} method, after all bindings and the init method have been resolved by taking all methods stored in the \code{MethodCache} and creating the appropriate vertices.
+
+Lastly in the \code{addEdgesForLists} method additional edges will be added for the \textit{all} vertices of properties of elements inside lists.
+
 \section{Scenario Generation}
 
 % half a page, 1 page?
