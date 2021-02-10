@@ -1,18 +1,15 @@
 \section{Project Structure and Overview}
-The application is written mostly in TypeScript using npm as a package manager and Node.js as a runtime environment. 
+The application is written in TypeScript(excluding the ESLint visitors, which have to be in JavaScript) using NPM as a package manager and Node.js as a runtime environment. 
 
+Notable dependencies are TypeScript, for stricter syntax and types, lodash\parencite{lodash} for enrichening of collections, graphlib\parencite{graphlib} for the interaction diagrams graph,  babel\parencite{babel} as a transcompiler, eslint\parencite{eslintMainPage}, Estree\parencite{estreeASTSpec} and eslint-plugin-vue\parencite{eslint_vue_parser} for parsing Vue.js code, d3-graphviz\parencite{graph_viz} in combination with light-server\parencite{light_server} for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
 
-
-
-%TODO eslint only js thats why no ts. at intro probably
-Notable dependencies are TypeScript, for stricter syntax and types, lodash\parencite{lodash} for enrichening of collections, graphlib\parencite{graphlib} for the interaction diagrams graph,  babel\parencite{babel} as a transcompiler, eslint\parencite{eslintMainPage}, estree\parencite{estreeASTSpec} and eslint-plugin-vue\parencite{eslint_vue_parser} for parsing Vue.js code, d3-graphviz\parencite{graph_viz} in comination with light-server\parencite{light_server} for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
-
-%TODO lint, ci, tests, etc? gith?
+The application source code is linted using ESLint, unit tests written in jest (a total of 109 tests cases) and also includes simplistic regression tests. Git is used for version control and also a CI/CD pipelines is setup, which on each commit runs the tests and regression tests and also ensure there are no type errors, as reported by TypeScript, and no linting errors, as reported by ESLint. 
+A separate minimal, Vue.js project is included \parencite{KarakoA2021Feb} in which the test \gls{spa} applications can be executed in viewed in a browser.
 
 \subsection{Project structure}
 %TODO define lang
 The main source files of the project and their tests are included in the \code{src} directory and structured in several packages, each corresponding to a step in the process, except common, which is shared among all steps. Each will be described in more detail in the following sections.
-Each package includes a models directory, which inludes the data types defined and used in this section.
+Each package includes a models directory, which includes the data types defined and used in this section.
 The \code{web} directory contains code used to view the resulting diagram in the browser.
 The \code{scripts} directory includes helper bash scripts, \code{results} holds snapshots of the results throughout development (with the latest being the current) and \code{resources} hold various additional files needed.
 \begin{lstlisting}
@@ -45,10 +42,10 @@ The \code{scripts} directory includes helper bash scripts, \code{results} holds 
 
 \section{Parsing Vue.js}
 
-Instead of implementing a parser, which directly outputs the simplfied Vue.js \gls{ast} described in \ref{ast} the capabilities of \textcite{eslintMainPage}  %TODO add cit
+Instead of implementing a parser, which directly outputs the simplified Vue.js \gls{ast} described in \ref{ast} the capabilities of \textcite{eslintMainPage} 
 and \parencite{eslint_vue_parser} were used. 
 The source files, which handle the parsing reside in the \code{parsing} directory.
-The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. Custom visitors are implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method defintions, computed properties and the created method.
+The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. Custom visitors are implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method definitions, computed properties and the created method.
  
 \subsection{Common Data Types}
 Below are the common data types used by all visitors.
@@ -88,7 +85,7 @@ export interface Method {
   discriminator: EntityType.METHOD;
 }
 \end{lstlisting}
-Discriminators are used to be able to diferentiate between the types using type guards. The enums themselves are omitted here (\code{IdentifierType}, \code{EntityType}). The definitions here are not exactly the same as in the \gls{ast} \ref{ast} - some constraints are omitted, such as method names having to end on a a \code{NameIdentifier}. This will be given, since the parsed code would be invalid javascript otherwise.
+Discriminators are used to be able to differentiate between the types using type guards. The enums themselves are omitted here (\code{IdentifierType}, \code{EntityType}). The definitions here are not exactly the same as in the \gls{ast} \ref{ast} - some constraints are omitted, such as method names having to end on a a \code{NameIdentifier}. This will be given, since the parsed code would be invalid JavaScript otherwise.
 \subsection{Top Level Properties}
 The result of the top level properties has the following data type.
 \begin{lstlisting}
@@ -202,7 +199,7 @@ The name of the method including its arguments can be extracted from by \code{Pr
 },
 \end{lstlisting}
 Further the properties read, written and methods called need to be extracted. Methods called can be obtained by selecting \code{CallExpression} nodes. Properties written to can be obtained from the left side of a \code{AssignmentExpression} \ref{eslint:AssignmentExpression}.
-There does not seem be an easy way to select all properties read from. Therefore all accesed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from.
+There does not seem be an easy way to select all properties read from. Therefore all accessed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from.
 
 The following code can be used to obtain all variables written to by the current method-like in scope. 
 \begin{lstlisting}
@@ -213,7 +210,7 @@ Property[key.name = computed]) AssignmentExpression"(node) {
 },
 \end{lstlisting}
 \subsection{Output}
-Combinging all of the above, the following data structure is output.
+Combining all of the above, the following data structure is output.
 \begin{lstlisting}
 export class Result {
   fileName: string;
@@ -228,15 +225,15 @@ export class Result {
 The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{Transformer} class. 
 
 The resolution of methods is abstracted in the \code{MethodResolver} class. It produces a 
-\code{ResolvedMethodDefintition} for each called method in bindings and the initial method. In order to prevent duplicate resolution of methods and wasting of resources a \code{MethodCache} is introduced. The \code{Transformer} does not use the \code{MethodResolver} directly, but instead accesses it via the \code{MethodCache}. The cache includes directly called (bound to) and indirectly called (calls of methods), for each of which vertices will have to be created. 
-Each \code{ResolvedMethodDefintition} has the following data type:
+\code{ResolvedMethodDefinition} for each called method in bindings and the initial method. In order to prevent duplicate resolution of methods and wasting of resources a \code{MethodCache} is introduced. The \code{Transformer} does not use the \code{MethodResolver} directly, but instead accesses it via the \code{MethodCache}. The cache includes directly called (bound to) and indirectly called (calls of methods), for each of which vertices will have to be created. 
+Each \code{ResolvedMethodDefinition} has the following data type:
 \begin{lstlisting}
 export enum GeneralisedArgument {
   METHOD = "method",OTHER = "other",
 }
 export type ResolvedArgument =
   | Property | GeneralisedArgument.METHOD | GeneralisedArgument.OTHER;
-export interface ResolvedMethodDefintition {
+export interface ResolvedMethodDefinition {
   id: Identifiers;
   args: ReadonlyArray<ResolvedArgument>;
   reads: ReadonlyArray<Property>;
@@ -302,7 +299,7 @@ This happens in the \code{addIndirectlyCalledMethods()} method, after all bindin
 Lastly in the \code{addEdgesForLists} method additional edges will be added for the \textit{all} vertices of properties of elements inside lists.
 
 \section{Scenario Generation}
-The scenario generation is implemented in the \code{scenario.ts} file and currently ouputs the obtained scenarios, tags, nodes react to and the gherkin scenarios templates to the console. The scenarios are generated exactly as described in \ref{concept:scenario_generation}
+The scenario generation is implemented in the \code{scenario.ts} file and currently outputs the obtained scenarios, tags, nodes react to and the gherkin scenarios templates to the console. The scenarios are generated exactly as described in \ref{concept:scenario_generation}
 
 \section{Display of Interaction Diagram}
 In order to display the interaction diagrams it is displayed on a single html page, utilizing the d3-graphviz \parencite{graph_viz} library. 
@@ -319,7 +316,7 @@ The application can be started using
 npm run generate -- [file to parse] [output graph path] [depth]
 \end{lstlisting}
 where file to parse is the path to the \code{.vue} file to be parsed and output graph path is the path to which the output interaction diagram graph will be written (JSON object). Depth is the factor $k$ in \ref{concept:scenario_generation}.
-A web server can be startet in order to view the results in a browser at \code{localhost:8000} via
+A web server can be started in order to view the results in a browser at \code{localhost:8000} via
 %lang bash
 \begin{lstlisting}
 npm run serve
@@ -337,3 +334,5 @@ All snapshots can be viewed using
 npm run results 
 \end{lstlisting}
 and navigating to \code{localhost:8001}
+
+%TODO TS in  glossary?

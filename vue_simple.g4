@@ -10,18 +10,18 @@ computedProperties: (methodDefinitionIdentifier reads writes calls)*;
 methodDefinition: methodDefinitionIdentifier methodArgs reads writes calls;
 
 methodArgs: NAME_IDENTIFIER*;
-reads: accesedVariable*;
-writes: accesedVariable*;
+reads: accessedVariable*;
+writes: accessedVariable*;
 calls: calledMethod*;
 
 calledMethod: calledMethodIdentifier '(' calledArgs ')';
-accesedVariable: identifier;
-calledArgs: (calledMethod | accesedVariable)*;
+accessedVariable: identifier;
+calledArgs: (calledMethod | accessedVariable)*;
 
 bindings: binding*;
 binding: tag bindingSource+;
-bindingSource: (accesedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING)
-              | accesedVariable TWO_WAY_BINDING;
+bindingSource: (accessedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING)
+              | accessedVariable TWO_WAY_BINDING;
 
 tag: name tagId loc;
 tagId: LINE '_' COLUMN '_' LINE '_' COLUMN;
