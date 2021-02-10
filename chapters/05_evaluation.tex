@@ -1,5 +1,8 @@
 \section{Scenario}
 \textcite{zhang2019scenario} use an example of a small \gls{spa} titled "Math for kids", which generates simple math addition problems and keeps track of a small statistic, which includes the number of correctly and incorrectly answered problems. The same application has been implemented and extended in Vue.js and will be used to display the capabities of the interaction diagram and scenario generation application.
+%TODO rename section "Simple Application"? "Basic capabilities?" 
+%"the morning is wiser than the evening" '\parencite{ aafanasyev_vasilisa_1997}
+
 \section{Math for Kids}
 
 \begin{figure}[H]
@@ -121,21 +124,55 @@ Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} 
 
 \section{Lists and Computed Properties}
 
-\ref{fig:diagram_list_complex} shows an extension to the Math for Kids application. The full source code can be found it \ref{appendix:math_kids_extended_source_code}
+\ref{fig:eval_image_list_complex} shows an extension to the Math for Kids application. The full source code can be found it \ref{appendix:math_kids_extended_source_code}
+
+The application now displays past problems in a list, randomly generates either a subtraction or addition problem, and also keeps tracks of statistics separated by problem type and includes and additional accuracy statistic.
+
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/math_for_kids_own_complex.png}
+     \caption{Math for Kids in Vue.js including subtraction problems, more precise statistics and display of past problems }
+     \label{fig:eval_image_list_complex}
+\end{figure}
+
+\ref{fig:diagram_list_complex} shows the interaction diagram for the application, which looks more complex, but it is still possible to focus on specific components and see how they affect/are affected by others. 
+
+The two vertices for the computed properties \textit{accuracy\_sub} and \textit{accuracy\_add} correctly directly depend on \textit{count\_right\_sub}, \textit{count\_wrong\_sub} and \textit{count\_right\_add}, \textit{count\_wrong\_add} respectively.
+
+By looking at the reactions, one can observe that based on which of the mutually exclusive Check buttons is clicked on, either the substituting or addition related properties are updated. 
+
+This example includes a bit of engineering - more realistically there would a single button, which checks inside the bound method which should be updated, however the application would not be able to be differentiate them in this case, since if statements inside methods are not supported.
+
+This differentiation is also evident in the generated Gherkin scenario templates. 
+
+All generated scenarion templates up to 4 actions can be seen in  \ref{appendix:math_kids_extended_scenarios}
+
+\begin{lstlisting}
+l(problems[i].answer) -> problems[i].answer, Check, Check
+l(Check) -> Right, Wrong, Check, Check, count_right_add, accuracy_add, count_wrong_add
+l(Check) -> Right, Wrong, Check, Check, count_right_sub, accuracy_sub, count_wrong_sub
+l(New Problem) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
+l(created) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
+\end{lstlisting}
+
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/diagram_list_add_sub.png}
+     \caption{Generated interaction diagram for Math for Kids including subtraction in Vue.js}
+     \label{fig:diagram_list_complex}
+\end{figure}
+
+
+%TODO example to showcase list properties and multiple specific updates?
+
+%TODO double check scenarios generated
+
 
 %2. example with lists
 %3. complex list(add, sub) with focus on updates
 
 
 %TODO nah, noneed so formal
-, used to display the capabilities of the interaction diagram and Gherkin scenario template generation application when handling lists and computed properties.
 
-%TODO if-else comment on. way to diferentiate currently, since if-else in code not suported ytet
+%example a bit engineered
 
-\begin{figure}[H]
-    \includegraphics[width=\textwidth]{images/math_for_kids_own_complex.png}
-     \caption{Math for Kids in Vue.js including subtraction problems, more precise statistics and display of past problems }
-     \label{fig:diagram_list_complex}
-\end{figure}
 
 %TODO link to https://github.com/KarakoA/vuejs-example and say examples can be deployed there

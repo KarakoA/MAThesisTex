@@ -5,7 +5,7 @@ Together with this thesis a \textit{.zip} file is submitted, which contains the 
 \subsection{Math for Kids}
 \label{appendix:math_kids_basic_source_code}
 \begin{lstlisting}
-    <template>
+<template>
     <div>
       <div style="margin-left: 5px; margin-top: 20px">
         <form @submit.prevent>
@@ -129,10 +129,10 @@ Together with this thesis a \textit{.zip} file is submitted, which contains the 
   </style>  
 \end{lstlisting}
 \label{appendix:math_kids_basic_source_code}
-\subsection{Math for Kids Extenden}
+\subsection{Math for Kids Extended}
 \label{appendix:math_kids_extended_source_code}
 \begin{lstlisting}
-    <template>
+<template>
     <div>
       <ul>
         <li v-for="problem in problems" :key="problem.id">
@@ -332,4 +332,170 @@ Together with this thesis a \textit{.zip} file is submitted, which contains the 
     margin-righ: 5px;
   }
   </style>  
+\end{lstlisting}
+
+\section{Generated Gherkin Scenarios}
+\subsection{Math for Kids Extended}
+\label{appendix:math_kids_extended_scenarios}
+\begin{lstlisting}
+Scenario: ['created']
+	When 'created'
+	Then 'problems[i].a'
+	And '+'
+	And '-'
+	And 'Check'
+	And 'Check'
+	And 'problems[i].b'
+	And 'problems[i].answer'
+	And 'Right'
+	And 'Wrong'
+
+Scenario: ['created', 'problems[i].answer']
+	Given 'created'
+	When 'problems[i].answer'
+	Then 'problems[i].answer'
+	And 'Check'
+	And 'Check'
+
+Scenario: ['created', 'Check']
+	Given 'created'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'Check']
+	Given 'created'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_sub'
+	And 'accuracy_sub'
+	And 'count_wrong_sub'
+
+Scenario: ['created', 'New Problem']
+	Given 'created'
+	When 'New Problem'
+	Then 'problems[i].a'
+	And '+'
+	And '-'
+	And 'Check'
+	And 'Check'
+	And 'problems[i].b'
+	And 'problems[i].answer'
+	And 'Right'
+	And 'Wrong'
+
+Scenario: ['created', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'Check', 'Check']
+	Given 'created'
+	And 'Check'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'Check', 'Check']
+	Given 'created'
+	And 'Check'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'New Problem', 'Check']
+	Given 'created'
+	And 'New Problem'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'New Problem', 'Check']
+	Given 'created'
+	And 'New Problem'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'New Problem', 'problems[i].answer']
+	Given 'created'
+	And 'New Problem'
+	When 'problems[i].answer'
+	Then 'problems[i].answer'
+	And 'Check'
+	And 'Check'
+
+Scenario: ['created', 'New Problem', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'New Problem'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
+Scenario: ['created', 'New Problem', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'New Problem'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+	And 'count_wrong_add'
+
 \end{lstlisting}
