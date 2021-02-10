@@ -1,9 +1,5 @@
-\section{Scenario}
+\section{Math for Kids - Simple Properties}
 \textcite{zhang2019scenario} use an example of a small \gls{spa} titled "Math for kids", which generates simple math addition problems and keeps track of a small statistic, which includes the number of correctly and incorrectly answered problems. The same application has been implemented and extended in Vue.js and will be used to display the capabities of the interaction diagram and scenario generation application.
-%TODO rename section "Simple Application"? "Basic capabilities?" 
-%"the morning is wiser than the evening" '\parencite{ aafanasyev_vasilisa_1997}
-
-\section{Math for Kids}
 
 \begin{figure}[H]
     \centering
@@ -122,7 +118,7 @@ Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} 
 
 \end{figure}
 
-\section{Lists and Computed Properties}
+\section{Math for Kids Extended - Lists and Computed Properties}
 
 \ref{fig:eval_image_list_complex} shows an extension to the Math for Kids application. The full source code can be found it \ref{appendix:math_kids_extended_source_code}
 
@@ -173,6 +169,86 @@ l(created) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answ
 %TODO nah, noneed so formal
 
 %example a bit engineered
+
+
+%TODO link to https://github.com/KarakoA/vuejs-example and say examples can be deployed there
+
+% 3 coloured buttons? %
+%a button that resets all
+% one that mixes colours
+
+% or list with 3 elem and buttons do things
+
+\section{Daily Meals - Lists and Properties of Lists}
+
+\ref{fig:eval_image_meal} shows a simple application, which displays a simplstic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:appendix:daily_menu_source_code}.
+
+The daily meal and it's price is changed each day via a button click, and alternates between the first two items (the third item - steak is never the daily meal). There is also an option to discount the price of all items. Being the restaurants main source of income, there is also an additional advertisement label for steaks.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+         \includegraphics[width=0.45\textwidth]{images/meal_1.png}
+         \caption{The current meal of the day is salad.}
+    \end{subfigure}\hfill%
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.45\textwidth]{images/meal_2.png}
+        \caption{The 'new day' button has been clicked and the daily meal now changed to soup.}
+    \end{subfigure}\hfill%
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=0.45\textwidth]{images/meal_3.png}
+        \caption{Discount was clicked and the price of all items got updated.}
+    \end{subfigure}
+    \caption{The menu with daily meal application }
+    \label{fig:eval_image_meal}
+\end{figure}
+
+\ref{fig:diagram_meal_list_properties} shows the interaction diagram for the application and the resulting reactions and scenarios of up to 4 steps can be seen in \ref{eval:reactions_meal} and \ref{eval:scenarios_meal} respectively.
+
+\label{eval:reactions_meal}
+\begin{lstlisting}
+l(New Day) -> Price, Meal of the day -
+l(Discount all) -> Best steak in town -, Price
+l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
+\end{lstlisting}
+
+As can be seen most clearly in \ref{eval:reactions_meal}, The 'New Day' button changes the 'Meal of the day' and all 'Price' list HTML tags. Only the price of each meal is changed, the 'meals[i].name' HTML tags remain the same. 'Best steak in town' is also not updated, since steak is never the daily meal. 
+
+Clicking on 'Discount all' does indeed change both 'Best steak in town' and all 'Price' HTML tags, since everything is discounted.
+
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{images/diagram_meal.png}
+     \caption{Generated interaction diagram for Daily Menu}
+     \label{fig:diagram_meal_list_properties}
+\end{figure}
+
+\label{eval:scenarios_meal}
+\begin{lstlisting}
+Scenario: ['created']
+	When 'created'
+	Then 'meals[i].name'
+	And 'Price'
+	And 'Best steak in town -'
+	And 'Meal of the day -'
+
+Scenario: ['created', 'New Day']
+	Given 'created'
+	When 'New Day'
+	Then 'Price'
+	And 'Meal of the day -'
+
+Scenario: ['created', 'Discount all']
+	Given 'created'
+	When 'Discount all'
+	Then 'Best steak in town -'
+	And 'Price'
+
+\end{lstlisting}
+
+
+%TODO double check scenarios generated
 
 
 %TODO link to https://github.com/KarakoA/vuejs-example and say examples can be deployed there
