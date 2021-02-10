@@ -7,14 +7,12 @@
          \centering
          \includegraphics[width=0.45\textwidth]{images/math_for_kids_zhang.png}
          \caption{Math for Kids in AngularJS by \textcite{zhang2019scenario}}
-         \label{fig:evaluation_math_kids_zhang}
     \end{subfigure}\hfill%
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=0.45\textwidth]{images/math_for_kids_own.png}
         \caption{Own implementation of Math for Kids in Vue.js}
-        \label{fig:evaluation_math_kids_own}
-    \end{subfigure}\hfill%
+    \end{subfigure}
 \end{figure}
 
 The source code can be found in \code{resources/test-files/test.vue} and also in \ref{appendix:math_kids_basic_source_code}.
@@ -61,8 +59,7 @@ One could argue, that the version in \parencite{zhang2019scenario} is correct, s
 \subsection{Scenarios}
 Gherkin scenarios of up to 4 actions are generated, which can be seen in the following figures. The program outputs the scenarios as plain text to the console, but here they are displayed in a nicer way. The caption of each figure is an example of how a text could be generated based on the template scenario output by the application.
 
-%TODO cite and explain  this in first section and ref from here
-Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} - The product owner, tester and developer \parencite{cucumber_amigos} to decide which templates to discard. Since interaction diagrams model what \textit{might} be updated, it will probably be reasonable to discard some scenarios. The fact that everything which might get updated can also be leveraged in another way - negative criteria can be definied (assert tag/component $X$ did not change).
+Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} \ref{amigos} to decide which templates to discard. Since interaction diagrams model what \textit{might} be updated, it will probably be reasonable to discard some scenarios. The fact that everything which might get updated can also be leveraged in another way - negative criteria can be definied (assert tag/component $X$ did not change).
 %TODO play around with subfigure alignment, there be
 %https://tex.stackexchange.com/questions/333249/controlling-subfigure-captions-and-subfigure-placement
 \begin{figure}[H]
@@ -114,7 +111,7 @@ Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} 
     \centering
     \includegraphics[width=0.48\textwidth]{images/scenarios_8.png}
     \caption{Scenario: requesting a new problem, answering it and checking my answer. Given the application has been created and I requested a new problem and answered it, when I click 'Check' then 'Right' should be visible if the answer was right 'Wrong' should be visible if the answer was wrong and 'Check' should be disabled and 'count\_right' should be incremented by one if the answer was right and 'count\_wrong' should be incremented by one if the answer did not change. }
-\end{subfigure}\hfill%
+\end{subfigure}
 
 \end{figure}
 
@@ -181,7 +178,7 @@ l(created) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answ
 
 \section{Daily Meals - Lists and Properties of Lists}
 
-\ref{fig:eval_image_meal} shows a simple application, which displays a simplstic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:appendix:daily_menu_source_code}.
+\ref{fig:eval_image_meal} shows a simple application, which displays a simplstic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:daily_menu_source_code}.
 
 The daily meal and it's price is changed each day via a button click, and alternates between the first two items (the third item - steak is never the daily meal). There is also an option to discount the price of all items. Being the restaurants main source of income, there is also an additional advertisement label for steaks.
 \begin{figure}[H]
@@ -244,7 +241,6 @@ Scenario: ['created', 'Discount all']
 	When 'Discount all'
 	Then 'Best steak in town -'
 	And 'Price'
-
 \end{lstlisting}
 
 

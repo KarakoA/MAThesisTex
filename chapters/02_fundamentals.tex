@@ -18,43 +18,33 @@ TODO
 \end{itemize}
 \subsection{Interaction Diagrams}
 \label{intro:zhang_interaction_diagrams}
-\textcite{zhang2019scenario} define interaction diagrams as a directed graph ($N$, $E$) where the set of nodes $N$ is defined as the union of $N_H$ (HTML tag nodes), $N_{\$scope}$ (TODO name), $N_js$ (TODO name). 
+\textcite{zhang2019scenario} define interaction diagrams as a directed graph ($N$, $E$). 
 
-TODO double check, write as text
-$N_H = \{n_h | (h,v) \in D\}$ %TODO those are html tags
+\subsubsection{Nodes}
+The set of nodes $N$ is defined as the union of $N_H$ (HTML tag nodes), $N_{\$scope}$ (databindings and events) and  $N_js$ (javascript functions). 
 
-$N_{\$scope} = \{n_v | (h,v) \in D\} \cup \{n_e | (h,e) \in E\} $ %(TODO those are databindings and events)
+Formally $N_H = \{n_h | (h,v) \in D\}$ , $N_{\$scope} = \{n_v | (h,v) \in D\} \cup \{n_e | (h,e) \in E\}$ 
+$N_{js} = \{n_v | v \in W\} \cup \{n_f | f \in F\} $
 
-$N_js = \{n_v | v \in W\} \cup \{n_f | f \in F\} $
+$n_{init}$ is distinguished by an incoming arrow without a starting vertex.
 
-$n_{init}$ is distinguished by an incoming arrow without a starting vertex
+\subsubsection{Edges}
+The set of edges $E$ is a combination of seven sets.
 
-Edges:
-
-bindings 
-
-$e_d = (target(d),source(d))$
-$E_{data} = \{e_d |  d \in D \}$
-
-addiionaly if $d \in D'$ also create $e'_t = (source(t),target(t))$ and $E'_data = \{e_d |  d \in D' \}$
-
-for events ($E_{event}$) $(h,f) \in E$,
-
-write $E_{W}$ $(f,v)$ where $f \in F \cup F(\$scope), v \in W(f)$
-
-read $E_{R}$ $(v,f)$ where $f \in F \cup F(\$scope), v \in R(f)$
-
-invoked $E_{Inv}$ $(f,v)$ where $f \in F \cup F(\$scope), v \in I(f)$
-
-
+\begin{itemize}
+  \item data bindings are defined as $e_d = (target(d),source(d))$ , $E_{data} = \{e_d |  d \in D \}$. Addiionaly for two-way bindings: if $d \in D'$ also create $e'_t = (source(t),target(t))$ and $E'_{data} = \{e_d |  d \in D' \}$
+\item events are defined as ($E_{event}$) $(h,f) \in E$,
+\item variables methods write to - $E_{W}$, $(f,v)$ where $f \in F \cup F(\$scope), v \in W(f)$
+\item variables methods read from $E_{R}$ $(v,f)$ where $f \in F \cup F(\$scope), v \in R(f)$
+\item methods, invoked by other methods - $E_{Inv}$ $(f,v)$ where $f \in F \cup F(\$scope), v \in I(f)$
+\item  default values of widget set by the init function
 $E_{init}$ default values of widgets 
 for each $h \in T $ where $ \nexists v | (h,v) \in D$ create an edge $(h,v)$ 
-\
-explained in a lot of detail in \parencite[9]{zhang2019scenario}
+\end{itemize}
+The above is explained in a lot of detail in \parencite[9]{zhang2019scenario}
 
 \subsection{Testing and Interactions}
-%TODO ... the red text p10
-\textcite{zhang2019scenario} define an interaction as a round of user input including updates to the widgets by the application. Interaction can be triggered explicitly by the user (by invoking an event handler) or implicitly while the user is updating data. \parencite{zhang2019scenario} %TODO anton I don't model it like ths, don't need
+\textcite{zhang2019scenario} define an interaction as a round of user input including updates to the widgets by the application. Interaction can be triggered explicitly by the user (by invoking an event handler) or implicitly while the user is updating data. \parencite{zhang2019scenario}
 
 Given the interaction diagrams as described in \ref{intro:zhang_interaction_diagrams} it is possible to derive which widgets get updated by a user input action or set up by the initial function. \textcite{zhang2019scenario} define it formally as follows:
 \begin{quote}
@@ -84,8 +74,6 @@ Define $A \oplus x = a_0,a_1,\ldots,a_n,x$ For $n > 0, S_{n+1}= \{ p \oplus x |p
 
 Based on the scenario sets \textcite{zhang2019scenario} define the following coverage criteria:
 \begin{quote}
-  
-
 \begin{itemize}
   \item Each set $S_n$ of test scenarios should be tested.
   \item For each given $S_n$, each $p \in S_n$ should be tested.
@@ -109,22 +97,19 @@ A Scenario test must be
 \textcite{kaner2013introduction} describes the biggest advantages of scenario testing to be  - understanding and learning the product in early stages of development(1), connecting of testing and requirement documentations(2), exposing shortcomings in delivering of desired benefits(3), exploration of expert use of the program(4), expose requirement related issues(5).
 
 \section{Behavior-Driven Development}
-Behavior-Driven Development (BDD), pioneered by  \textcite{north2006behavior} is a software development
-process , that combines principles from Test-Driven Development and Domain-Driven design \parencite{evans2004domain}.
+\label{fundamentals:bdd}
+\gls{bdd}, pioneered by \textcite{north2006behavior} is a software development
+process, that combines principles from Test-Driven Development and Domain-Driven design \parencite{evans2004domain}.
 
 Its main goal is to specify a system in terms of its functionality (i.e. it's behaviors) with a simple domain-specific language (DSL) making use of English-like sentences. This stimulates collaboration between developers and non-technical stakeholders and further results in a closer connection between acceptance criteria for a given function and matching tests used for its validation.
 
-BDD splits a user story into multiple scenarios, each formulated in the form of \textit{Given}, \textit{When}, \textit{Then} statements, respectively specifying the prerequisite/context, event and outcomes of a scenario. 
+\gls{bdd} splits a user story into multiple scenarios, each formulated in the form of \textit{Given}, \textit{When}, \textit{Then} statements, respectively specifying the prerequisite/context, event and outcomes of a scenario. 
+\label{amigos}
+Typically the scenarios are written by the \textit{The Three Amigos} - The product owner, tester and developer \parencite{cucumber_amigos}.
 
-[TODO] example here? cut shorter
-
-At present ... there based on the division of behavior descriptions and behaviors. Such as Jest/Jasmine combine behavior descriptions and behaviors into one, whereas as Cucumber uses a DSL named Gherkin to specify the behavior descriptions and provides a set of tools to generate behaviors.
-%[TODO example A vs B? ]
-
-
-% \subsection{the other one(forgot name)}
-% splitting into ...
 \subsection{Gherkin Language}
+
+Gherkin \parencite{gherkin_language} is a \gls{dsl} for definition of test scenarios using the \gls{bdd} verbs, described in \ref{fundamentals:bdd}. It is used in the Cucumber test framework, which provides tools to generate tests templates in various programming languages.
 
 \section{Model-View-ViewModel}
 \label{sec:mvvm}
@@ -153,59 +138,29 @@ Vue.js \parencite{vuejs_gh} is a progressive front end framework for building us
 \subsection{Components}
 At the core of Vue.js are components, which are small, self-contained, composable and often reusable custom elements. Almost any type of application can be represented as a tree of components \parencite{vuejs_guide}. 
 
-In more concrete terms, a Vue.js component is a single file with the extension of \code{.vue}, which consists of a \code{template}, \code{script} and optional \code{style} part. The \code{template} is a HTML-based template, which can be parsed specification compliant browsers and HTML parsers. It can contain other components or html elements and is equivalent to the \textit{view} in \gls{mvvm}. 
+In more concrete terms, a Vue.js component is a single file with the extension of \code{.vue}, which consists of a \code{template}, \code{script} and optional \code{style} part. The \code{template} is a HTML-based template, which can be parsed by specification compliant browsers and HTML parsers. It can contain other components or html elements and is equivalent to the \textit{view} in \gls{mvvm}. 
 
-The \textit{code} section of a Vue.js component includes the view-model of the component. It has a special json object \code{data}, which is equivalent to the \gls{mvvm} model. %TODO not so nicely written
+The \textit{code} section of a Vue.js component includes the view-model of the component. Each component has a special json object \code{data}, equivalent to the \gls{mvvm} model.
 The \code{script} part of a computed includes css-like styles.
 
-
-data binding is a general technique that binds data sources from the provider and consumer together and synchronizes them.
-
-
-\subsection{Reactivity}
-
-%TODO this with own words here
-% https://vuejs.org/v2/guide/reactivity.html
-
-\dots enables data binding
-\subsection{Directives}
-Vue.js enables one way bindings(from source - data to target - component or html tag) via the \code{v-bind} (line X,Y) or \textit{moustache} syntax (line Z). 
-Bindings can contain expressions (line X,Y). 
-
-Two way binding can be achieved using the \textit{v-model} directive (line,X,Y,Z). 
-Event handlers can be bound by the method name or also expressions.
-
-%TODO vfor binding here
-
-%TODO examples in code snippet image
-
 \subsection{Data Binding}
-Vue.js provides support for various forms of \gls{databinding} via a special syntax. Both the data and computed objects of a \code{Vue.js} component are reactive 
 
+Vue.js has built in support for data binding using special directives.
 
-Via a special syntax
-\code{Vue.js}
-- one way
-- two way
-- event bindings
-- inline expressions
-- computed properties
+\subsubsection{One-way Binding}
+One-way binding is a one directional binding from source - a property of the model or other components to target - a property of a component or html tag. It can be achieved via the \code{v-bind} or \textit{moustache} styntax (double curly brackets). One-way bindings can also contain complex expressions.
 
-\subsection{Vue.js directives}
-\subsection{Structure of a Component}
+\subsubsection{Two-way Binding}
+Two-way binding is similar to one way-binding, but the value, which is bound to goes bothways and is synchronization. A typical example is a binding from an input field to a property of the model, e.g \code{email}. It can be achieved via the \code{v-model} binding directive.
 
-(template, code etc.)
+\subsubsection{Event binding}
+Event bindings are bindings of methods of the view model to events of components or html tags, for example the click on a button. It is done via the \code{v-on} or \code{@} directive. Event bindings could also contain anonymous methods.
 
-bindings two way, one way
+\subsubsection{Computed Properties}
+Computed properties are special properties, which can be used in data binding and are a composition of other properties. 
 
-g
-- data
-- computed properties
-
-template part
-code part
-bindings
-
+\subsubsection{V-for Binding}
+A \code{v-for} directive is a special type of binding used to render lists, which semantically can be used similarly to a \code{foreach} loop.
 
 \section{ESLint}
 
@@ -222,7 +177,7 @@ If the fixable property is specified, it indicates that the errors reported by t
 
 The \code{create} function of rules takes as arguments a \code{context} and returns an object of methods which are called by ESLint for each node based on the \gls{visitor} pattern while traversing the \gls{ast}. 
 
-\subsection{Selector}
+\subsection{Selectors}
 ESLint provides a very powerful matching mechanism for specifying what nodes to match called selectors \parencite{eslintSelectors} inspired by \textcite{estoolsEsQuery}.
 
 Some selectors include:
@@ -242,10 +197,5 @@ An incredibly useful tool when working with \glspl{ast} is \gls{ast} Explorer, d
 By default ESLint uses the \parencite{eslintEspree} parser to parse JavaScript source code into an \gls{ast} as defined by ESTree specification \parencite{estreeASTSpec}. When Parsing \textit{.vue} files ESLint uses this parser for the code inside the \code{<script>} tag.
   
 \subsection{ESLint Parser Vue AST}
+
 In order to parse the \code{<template>} section of \textit{.vue} files, ESLint uses the vue-eslint-parser \parencite{eslint_vue_parser}. This parser outputs an  \gls{ast} compliant with their own  \gls{ast}specification, defined in \parencite{eslint_vue_parser_ast}.
-
-
-%TODO compound graph? directed graph?
-
-
-%TODO does AST need explaining?
