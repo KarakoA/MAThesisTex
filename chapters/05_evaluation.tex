@@ -14,13 +14,13 @@
          \includegraphics[width=0.45\textwidth]{images/math_for_kids_zhang.png}
          \caption{Math for Kids in AngularJS by \textcite{zhang2019scenario}}
          \label{fig:evaluation_math_kids_zhang}
-    \end{subfigure}
+    \end{subfigure}\hfill%
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[width=0.45\textwidth]{images/math_for_kids_own.png}
         \caption{Own implementation of Math for Kids in Vue.js}
         \label{fig:evaluation_math_kids_own}
-    \end{subfigure}
+    \end{subfigure}\hfill%
 \end{figure}
 
 The source code can be found in \code{resources/test-files/test.vue} and also in \ref{appendix:math_kids_basic_source_code}.
@@ -65,7 +65,59 @@ One could argue, that the version in \parencite{zhang2019scenario} is correct, s
 
 
 \subsection{Scenarios}
-The following Gherkin scenarios of up to 4 elements are generated. The program outputs this as plain text to the console, but here they are displayed in a nicer way.
+Gherkin scenarios of up to 4 actions are generated, which can be seen in the following figures. The program outputs the scenarios as plain text to the console, but here they are displayed in a nicer way. The caption of each figure is an example of how a text could be generated based on the template scenario output by the application.
+
+%TODO cite and explain  this in first section and ref from here
+Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} - The product owner, tester and developer \parencite{cucumber_amigos} to decide which templates to discard. Since interaction diagrams model what \textit{might} be updated, it will probably be reasonable to discard some scenarios. The fact that everything which might get updated can also be leveraged in another way - negative criteria can be definied (assert tag/component $X$ did not change).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=0.48\textwidth]{images/scenarios_1.png}
+         \caption{Scenario: initialization. When the application is created, then 'a' and 'b' should show random numbers and 'Check' should be disabled and 'Right' and Wrong should be invisible.}
+    \end{subfigure}\hfill%
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=0.48\textwidth]{images/scenarios_2.png}
+        \caption{Scenario: typing an answer. Given the application has been created, when I type an answer then 'answer' should display it and 'Check' should be enabled.}
+    \end{subfigure}\hfill%
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=0.48\textwidth]{images/scenarios_3.png}
+        \caption{Scenario: clicking on check without typing an answer. Given the application has been created, when I click 'Check' then 'Right' and 'Wrong' should be invisible and 'count\_right' and 'count\_wrong' should have the same values and 'Check' should be disabled. }
+   \end{subfigure}\hfill%
+   \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/scenarios_4.png}
+    \caption{Scenario: obtaining a new problem at application start. Given the application has been created, when I click 'New Problem' then 'a' and 'b' should have random values and 'answer' should be empty and 'Check' should be disabled and 'Right' and 'Wrong' should be invisible.}
+\end{subfigure}\hfill%
+\end{figure}
+\begin{figure}[H]\ContinuedFloat
+    \centering
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/scenarios_5.png}
+    \caption{Scenario: checking my answer. Given the application has been created and 'answer' contains my answer, when I click 'Check' then 'Right' should be visible if the answer was right 'Wrong' should be visible if the answer was wrong and 'Check' should be disabled and 'count\_right' should be incremented by one if the answer was right and 'count\_wrong' should be incremented by one if the answer did not change. }
+\end{subfigure}\hfill%
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/scenarios_6.png}
+    \caption{Scenario: typing an answer to a new problem. Given the application has been created and a new problem was obtained, when I type an answer then 'answer' should display it and 'Check' should be enabled.}
+\end{subfigure}\hfill%
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/scenarios_7.png}
+    \caption{Scenario: requesting a new problem and clicking on check without answering it. Given the application has been created and I requested a new problem, when I click 'Check' then 'Right' and 'Wrong' should be invisible and 'count\_right' and 'count\_wrong' should have the same values and 'Check' should be disabled. }
+\end{subfigure}\hfill%
+\begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/scenarios_8.png}
+    \caption{Scenario: requesting a new problem, answering it and checking my answer. Given the application has been created and I requested a new problem and answered it, when I click 'Check' then 'Right' should be visible if the answer was right 'Wrong' should be visible if the answer was wrong and 'Check' should be disabled and 'count\_right' should be incremented by one if the answer was right and 'count\_wrong' should be incremented by one if the answer did not change. }
+\end{subfigure}\hfill%
+\end{figure}
+
+
 
 
 \section{Diagram with list}
