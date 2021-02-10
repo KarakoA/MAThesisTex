@@ -104,7 +104,6 @@ The top level properties visitor is the simplest of all since it only reacts to 
 %TODO lang
 \label{impl:top_level_select}
 \begin{lstlisting}
-
 "ExportDefaultDeclaration > ObjectExpression > 
 Property[key.name = data] ReturnStatement > ObjectExpression"(node){
   ...
@@ -161,7 +160,6 @@ Further, the binding type has to be determined. This can be extracted based on t
 
 With all the above, for example to match all two-way bindings and pass them on to the builder can be done via 
 \begin{lstlisting}
-  
 "VAttribute[key.name.name=model] > VExpressionContainer
 :matches(MemberExpression, Identifier, CallExpression)"(
   node) {
@@ -198,13 +196,11 @@ Analogous to how the top level \code{data} object is selected \ref{impl:top_leve
 The name of the method including its arguments can be extracted from by \code{Property[value.type=FunctionExpression]} nodes. Using this information, one can have three selectors, one of each type, to determine what is being defined. For example for regular methods:
  
 \begin{lstlisting}
-
 "ExportDefaultDeclaration > ObjectExpression > Property
 [key.name = methods] Property[value.type=FunctionExpression]"(node) {
   builder.newMethod(node, MethodType.METHOD);
 },
 \end{lstlisting}
-
 Further the properties read, written and methods called need to be extracted. Methods called can be obtained by selecting \code{CallExpression} nodes. Properties written to can be obtained from the left side of a \code{AssignmentExpression} \ref{eslint:AssignmentExpression}.
 There does not seem be an easy way to select all properties read from. Therefore all accesed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from.
 

@@ -1,13 +1,16 @@
-\section{State of the Art}
-TODO
-%\subsection{TODO some papers}
-%
+\section{Related Work}
+\textcite{andreasen2017survey} survey automated test generation in section 8\parencite[23-25]{andreasen2017survey}. They survey a total of 14 papers in this category and separate them into one of three approaches - explorations of the event space (concerning the order of execution of event handlers), explorations of the value space(choice of values for inputs), and generation of assertions \parencite{andreasen2017survey}. 
+In the event space category their findings include 
+approaches based on random executing of event handlers, heuristic methods, based on observations of read and written values in order to exclude handlers with no interaction and a tool for measuring the performance impact of handlers. Most of the discussed findings in the value category focus on concolic execution \parencite{godefroid2005dart}, a technique for generating concrete inputs (test cases) in order to maximize test coverage. Almost all of their finding in the assertion generation category are based on
+Crawljax \parencite{crawljax2021Feb}, and event-driven open source web crawler for dynamic Ajax-based Web applications, which is also capable of exploring JavaScript-based \gls{dom} state changes.
+A table with a more detailed overview can be found in \parencite[24]{andreasen2017survey}.
 
+Model checking of Web applications - a method for checking whether a finite-state model of a system conforms to a specification, is explored in \parencite{zhang2019scenario} and \parencite{gao2019model}
 \section{Scenario Testing of AngularJS-based Single Page Web Applications}
-\textcite{zhang2019scenario} present a method with the goal of achieving better undestanding of AngularJS-based \glspl{spa} and also devised a way to specify test coverage criteria based on it. At the center of the proposed method are interaction diagrams, which are used to model the overall data and control flow of an application.\parencite{zhang2019scenario}
+\textcite{zhang2019scenario} present a method with the goal of achieving better understanding of AngularJS-based \glspl{spa} and also devised a way to specify test coverage criteria based on it. At the center of the proposed method are interaction diagrams, which are used to model the overall data and control flow of an application.\parencite{zhang2019scenario}
 
 \subsection{Abstract Syntax}
-\textcite{zhang2019scenario} model a AngularJS-based \gls{spa} as a tuple ($T$, $C$, $D$, $E$), where
+\textcite{zhang2019scenario} model an AngularJS-based \gls{spa} as a tuple ($T$, $C$, $D$, $E$), where
 
 \begin{itemize}
   \item $T$ is a HTML template, consisting of a set of HTML tags (widgets) ($T = \{h\}$)
@@ -21,7 +24,7 @@ TODO
 \textcite{zhang2019scenario} define interaction diagrams as a directed graph ($N$, $E$). 
 
 \subsubsection{Nodes}
-The set of nodes $N$ is defined as the union of $N_H$ (HTML tag nodes), $N_{\$scope}$ (databindings and events) and  $N_js$ (javascript functions). 
+The set of nodes $N$ is defined as the union of $N_H$ (HTML tag nodes), $N_{\$scope}$ (databindings and events) and  $N_{js}$ (JavaScript functions). 
 
 Formally $N_H = \{n_h | (h,v) \in D\}$ , $N_{\$scope} = \{n_v | (h,v) \in D\} \cup \{n_e | (h,e) \in E\}$ 
 $N_{js} = \{n_v | v \in W\} \cup \{n_f | f \in F\} $
@@ -41,7 +44,7 @@ The set of edges $E$ is a combination of seven sets.
 $E_{init}$ default values of widgets 
 for each $h \in T $ where $ \nexists v | (h,v) \in D$ create an edge $(h,v)$ 
 \end{itemize}
-The above is explained in a lot of detail in \parencite[9]{zhang2019scenario}
+The above are explained in a lot more detail in \parencite[9]{zhang2019scenario}.
 
 \subsection{Testing and Interactions}
 \textcite{zhang2019scenario} define an interaction as a round of user input including updates to the widgets by the application. Interaction can be triggered explicitly by the user (by invoking an event handler) or implicitly while the user is updating data. \parencite{zhang2019scenario}
@@ -63,7 +66,7 @@ For example, in order for the widget $n$, which was clicked by the user, to upda
 What is crucial is that the interactions $l(n)$ define an upper bound of what can be updated, i.e. what might get updated. Nevertheless, this information is sufficient in order to be able to define coverage criteria \parencite{zhang2019scenario}.
 
 \subsection{Coverage Criteria}
-Interactions should not be tested in isolation and in order for tests to make sence, interactions as preconditions are required \parencite{zhang2019scenario}. 
+Interactions should not be tested in isolation and in order for tests to make sense, interactions as preconditions are required \parencite{zhang2019scenario}. 
 In order to define coverage criteria, \textcite{zhang2019scenario} extend their notation, as described in \ref{intro:zhang_interaction_diagrams}, by defining - $\mathcal{I}  = \{w\in T | l(w) \neq \emptyset \}$ all widgets, that result updates.
 
 A sequence of user interactions, including the initial function is refered to as a \textit{scenario} $A=(a_0,a_1,\ldots, a_n)$ where $a_0=init$ and $\forall0 < k \leq n, a_k \in \mathcal{I}$. The widgets, to which a scenario reacts, are equal to the widgets to which the last widget in the scenario reacts - $l(A)=l(a_n)$. 
