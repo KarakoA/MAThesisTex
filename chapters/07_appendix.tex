@@ -1,5 +1,102 @@
-\section{Source Code}
+\section{Submitted Source Code}
 Together with this thesis a \textit{.zip} file is submitted, which contains the source code of the application.
+
+\section{ESLint}
+\subsection{Notable AST Nodes}
+
+\subsubsection{ObjectExpression}
+\label{eslint:object_expression}
+\begin{lstlisting}
+interface ObjectExpression <: Expression {
+    type: "ObjectExpression";
+    properties: [ Property ];
+}
+\end{lstlisting}
+
+\subsubsection{Property}
+\label{eslint:property}
+\begin{lstlisting}
+interface Property <: Node {
+    type: "Property";
+    key: Literal | Identifier;
+    value: Expression;
+    kind: "init" | "get" | "set";
+}
+\end{lstlisting}
+
+\subsubsection{VElement}
+\label{eslint:velement}
+\begin{lstlisting}
+interface VElement <: Node {
+  type: "VElement"
+  namespace: string
+  name: string
+  startTag: VStartTag
+  children: [ VText | VExpressionContainer | VElement ]
+  endTag: VEndTag | null
+  variables: [ Variable ]
+}
+\end{lstlisting}
+
+\subsubsection{VText}
+\label{eslint:vtext}
+\begin{lstlisting}
+interface VText <: Node {
+  type: "VText"
+  value: string
+}
+\end{lstlisting}
+
+\subsubsection{VAttribute}
+\label{eslint:VAttribute}
+\begin{lstlisting}
+interface VAttribute <: Node {
+  type: "VAttribute"
+  directive: false
+  key: VIdentifier
+  value: VLiteral | null
+}
+\end{lstlisting}
+
+\subsubsection{Identifier}
+\label{eslint:identifier}
+\begin{lstlisting}
+interface Identifier <: Expression, Pattern {
+  type: "Identifier";
+  name: string;
+}
+\end{lstlisting}
+
+\subsubsection{MemberExpression}
+\label{eslint:member_expression}
+\begin{lstlisting}
+interface MemberExpression <: Expression, Pattern {
+  type: "MemberExpression";
+  object: Expression;
+  property: Expression;
+  computed: boolean;
+} 
+\end{lstlisting}
+
+\subsubsection{CallExpression}
+\label{eslint:call_expression}
+
+\begin{lstlisting}
+interface CallExpression <: Expression {
+  type: "CallExpression";
+  callee: Expression;
+  arguments: [ Expression ];
+}
+\end{lstlisting}
+
+\subsubsection{AssignmentExpression}
+\label{eslint:AssignmentExpression}
+\begin{lstlisting}
+extend interface AssignmentExpression {
+    left: Pattern;
+}
+\end{lstlisting}
+
 
 \section{Source Code}
 \subsection{Math for Kids}
