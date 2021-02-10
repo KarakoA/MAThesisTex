@@ -38,16 +38,16 @@
 
 % page style and footers, headers
 %TODO this caused errors
-% \usepackage{fancyhdr}
-% \pagestyle{fancy}
-% \fancyhead{}
-% \fancyhead[RO,LE]{\thesisTitle}
-% \fancyfoot{}
-% \fancyfoot[LE,RO]{\thepage}
-% \fancyfoot[LO,CE]{Chapter \thechapter}
-% \fancyfoot[CO,RE]{\thesisAuthor}
-% \renewcommand{\headrulewidth}{0.4pt}
-% \renewcommand{\footrulewidth}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RO,LE]{\thesisTitle{}}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Chapter \thechapter}
+\fancyfoot[CO,RE]{Anton Karakochev}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
 
 %appendix 
 %\usepackage[toc,page]{appendix}
