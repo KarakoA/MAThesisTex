@@ -16,7 +16,7 @@ Model checking of Web applications - a method for checking whether a finite-stat
   \item $T$ is a HTML template, consisting of a set of HTML tags (widgets) ($T = \{h\}$)
   \item 
   $C$ is a controller (view-model), written in JavaScript. It is modeled as a tuple ($V$, $F$, $\$scope$), where $F$ and $V$ are top level variables and functions respectively and $\$scope \in V$ is a distinguished element of $V$. Further $V(\$scope)$ and $F(\$scope)$ denote all variables and functions of $\$scope$ respectively. $W = V \setminus \{\$scope\}$ denotes top level variables not in scope. Additionally $init \in F$ is defined as an initialization function
-  \item $D$ is a set of data bindings between HTML tags and variable properties of $\$scope$ $ D \subseteq \{(h,V(\$scope) \cup F(\$scope))\}$. Given $d = (n,o)$ $source(d) = n$ and $target(d) = o$. For Two-way bindings $D' \subseteq D$ and $\forall d \in D'$ $target(d) \in V(\$scope)$.
+  \item $D$ is a set of \glspl{databinding} between HTML tags and variable properties of $\$scope$ $ D \subseteq \{(h,V(\$scope) \cup F(\$scope))\}$. Given $d = (n,o)$ $source(d) = n$ and $target(d) = o$. For Two-way bindings $D' \subseteq D$ and $\forall d \in D'$ $target(d) \in V(\$scope)$.
   \item $E$ a set of event handler bindings between HTML tags and function properties of $\$scope$: $E \subset \{(h,F(\$scope))\}$. In addition, for each function $f \in F \cup F(\$scope)$, $R(f) \subseteq V \cup V(\$scope)$ and $W(f) \subseteq V \cup V(\$scope)$ are defined as the values that the given function reads from and writes to. $Inv(f) \in F $ are defined as the functions invoked by $f$. \parencite{zhang2019scenario}
 \end{itemize}
 \subsection{Interaction Diagrams}
@@ -35,7 +35,7 @@ $n_{init}$ is distinguished by an incoming arrow without a starting vertex.
 The set of edges $E$ is a combination of seven sets.
 
 \begin{itemize}
-  \item data bindings are defined as $e_d = (target(d),source(d))$ , $E_{data} = \{e_d |  d \in D \}$. Additionally for two-way bindings: if $d \in D'$ also create $e'_t = (source(t),target(t))$ and $E'_{data} = \{e_d |  d \in D' \}$
+  \item \glspl{databinding} are defined as $e_d = (target(d),source(d))$ , $E_{data} = \{e_d |  d \in D \}$. Additionally for two-way bindings: if $d \in D'$ also create $e'_t = (source(t),target(t))$ and $E'_{data} = \{e_d |  d \in D' \}$
 \item events are defined as ($E_{event}$) $(h,f) \in E$,
 \item variables methods write to - $E_{W}$, $(f,v)$ where $f \in F \cup F(\$scope), v \in W(f)$
 \item variables methods read from $E_{R}$ $(v,f)$ where $f \in F \cup F(\$scope), v \in R(f)$
@@ -148,7 +148,7 @@ The \code{script} part of a computed includes CSS-like styles.
 
 \subsection{Data Binding}
 
-Vue.js has built in support for data binding using special directives.
+Vue.js has built in support for \gls{databinding} using special directives.
 
 \subsubsection{One-way Binding}
 One-way binding is a one directional binding from source - a property of the model or other components to target - a property of a component or html tag. It can be achieved via the \code{v-bind} or \textit{moustache} syntax (double curly brackets). One-way bindings can also contain complex expressions.
@@ -160,7 +160,7 @@ Two-way binding is similar to one way-binding, but the value, which is bound to 
 Event bindings are bindings of methods of the view model to events of components or html tags, for example the click on a button. It is done via the \code{v-on} or \code{@} directive. Event bindings could also contain anonymous methods.
 
 \subsubsection{Computed Properties}
-Computed properties are special properties, which can be used in data binding and are a composition of other properties. 
+Computed properties are special properties, which can be used in \gls{databinding} and are a composition of other properties. 
 
 \subsubsection{V-for Binding}
 A \code{v-for} directive is a special type of binding used to render lists, which semantically can be used similarly to a \code{foreach} loop.

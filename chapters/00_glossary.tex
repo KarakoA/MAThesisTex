@@ -3,36 +3,36 @@
 
 %http://ftp.rrzn.uni-hannover.de/pub/mirror/tex-archive/macros/latex/contrib/glossaries/glossariesbegin.pdf
 
-\makeglossaries
+
 
 \newglossaryentry{visitor}
 {
-    name=Visitor,
-    description={Is a design pattern used to separate an algorithm from the object structure on which it operates.}
+    name={Visitor},
+    description={Is a design pattern used to separate an algorithm from the object structure on which it operates}
 }
 
 \newglossaryentry{directed_graph}
 {
-    name=Directed Graph,
-    description={Is a graph that is made up of a set of vertices connected by edges, where the edges have a direction associated with them.}
+    name={Directed Graph},
+    description={Is a graph that is made up of a set of vertices connected by edges, where the edges have a direction associated with them}
 }
 \newglossaryentry{compound_graph}{
-    name=Compound Graph,
-    description={Is a graph that can have sub graphs.}
+    name={Compound Graph},
+    description={Is a graph that can have sub graphs}
 }
 
 
 \newglossaryentry{abstract_syntax_tree}
 {
-    name=Abstract Syntax Tree,
-    description={Is a tree representation of the abstract syntactic structure of source code written in a programming language. Each node of the tree denotes a construct occurring in the source code.}
+    name={Abstract Syntax Tree},
+    description={Is a tree representation of the abstract syntactic structure of source code written in a programming language. Each node of the tree denotes a construct occurring in the source code}
 }
 
 
 \newglossaryentry{databinding}
 {
-    name=Data Binding,
-    description={Is a technique, that enables synchronization of data between consumers and providers.}
+    name={Data Binding},
+    description={Is a technique, that enables synchronization of data between consumers and providers}
 }
 
 
@@ -44,7 +44,9 @@
 
 \newacronym{mvvm}{MVVM}{Model-View-ViewModel}
 
-\newacronym{ast}{AST}{Abstract syntax tree}
+\newglossaryentry{ast}{type=\acronymtype, name={AST}, description={Abstract syntax tree},see=[Glossary:]{abstract_syntax_tree}}
+
+%\newacronym{ast}{AST}{}
 
 \newacronym{ui}{UI}{User interface}
 
@@ -54,3 +56,5 @@
 
 \newacronym{dom}{DOM}{Document Object Model}
 
+%TODO see if needed 
+\glsaddall

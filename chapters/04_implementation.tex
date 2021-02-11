@@ -312,25 +312,25 @@ A button to download the displayed diagram as a \code{.png} image is also provid
 \section{Usage}
 The application can be started using
 %lang bash
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 npm run generate -- [file to parse] [output graph path] [depth]
 \end{lstlisting}
 where file to parse is the path to the \code{.vue} file to be parsed and output graph path is the path to which the output interaction diagram graph will be written (JSON object). Depth is the factor $k$ in \ref{concept:scenario_generation}.
 A web server can be started in order to view the results in a browser at \code{localhost:8000} via
 %lang bash
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 npm run serve
 \end{lstlisting}
 In order to create a snapshot for each file in \code{resources/test-files}.
 %lang bash
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 npm run create-results  
 \end{lstlisting}
 Can be used. This snapshot includes the output interaction diagram graph as \code{data.json}, the generated scenarios as a \code{scenario.txt}, \code{index.html}, which can be used to display the interaction diagram and a \code{.vue} file for which all of the above was generated.
 
 All snapshots can be viewed using
 %lang bash
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 npm run results 
 \end{lstlisting}
 and navigating to \code{localhost:8001}

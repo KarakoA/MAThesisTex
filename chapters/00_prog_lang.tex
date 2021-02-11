@@ -1,51 +1,76 @@
 
-\lstset{% This applies to ALL lstlisting
-backgroundcolor=\color{yellow!10},%
-numbers=left, numberstyle=\tiny, stepnumber=2, numbersep=5pt,%
-}%
+\lstloadlanguages{ % Check documentation for further languages ...
+% [Visual]Basic,
+% Pascal,
+% C,
+% C++,
+% XML,
+HTML,
+Java,
+bash
+}
+
+\definecolor{background}{HTML}{f9f9f9}
+
+\lstset{
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    backgroundcolor=\color{background},
+}
 
 %https://www.cl.uni-heidelberg.de/courses/ss18/wissschreib/material/listings.pdf
 
 
+\lstdefinestyle{bash}
+{
+    numberblanklines=false,
+    language=bash
+}
+
+\lstdefinestyle{vue}
+{
+    numberblanklines=false,
+    language=HTML
+}
+
 \lstdefinestyle{html}{
-    basicstyle=\small\ttfamily\color{red},%
-    breaklines=true,
-    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
-    commentstyle={\color{gray}\itshape},%                  gray italics for comments
-    morecomment=[l]{//},%                                  define // comment
-    emph={%
-        STRING%                                            literal strings listed here
-        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
-    alsoletter={:,|,;},%
-    morekeywords={:,|,;},%                                 define the special characters
-    keywordstyle={\color{black}},%                         and format them in black
+    numberblanklines=false,
+    language=HTML
 }
-\lstdefinestyle{antrl}{
-    basicstyle=\small\ttfamily\color{red},%
+%one day I shall learn how to properly use this for custom styles, but not today
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{HTML}{d10000}
+\definecolor{backcolour}{HTML}{F0F0F0}
+\lstdefinelanguage{antrl}{
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
     breaklines=true,
-    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
-    commentstyle={\color{gray}\itshape},%                  gray italics for comments
-    morecomment=[l]{//},%                                  define // comment
-    emph={%
-        STRING%                                            literal strings listed here
-        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
-    alsoletter={:,|,;},%
-    morekeywords={:,|,;},%                                 define the special characters
-    keywordstyle={\color{black}},%                         and format them in black
+    frame=lines,
+    backgroundcolor=\color{backcolour},
+    morekeywords={end,program,bindings,methodDefinitions,createdMethod,topLevelProperties,computedProperties,thisIdentifier,methodDefinition,reads,writes,calls,methodDefinitionIdentifier,methodArgs,accessedVariable,calledMethod,calledArgs,,binding,tag,bindingSource,name,tagId,loc,start,calledMethodIdentifier,identifier,id},
+      keywordstyle=\color{codeblue},
+      emph={LINE,UNICODE,COLUMN,TWO_WAY_BINDING,EVENT_BINDING,NAME_IDENTIFIER,THIS,ONE_WAY_BINDING, NUMERIC_INDEX, GENERIC_INDEX,JS_IDENTIFIER},emphstyle=\color{codegreen}
 }
-%https://tex.stackexchange.com/questions/78291/lstdefinestyle-syntax-highlighting
-% Applies only when you use it
-\lstdefinestyle{antrl-default}{
-    basicstyle=\small\ttfamily\color{red},%
-    breaklines=true,%                                      allow line breaks
-    moredelim=[s][\color{green!50!black}\ttfamily]{'}{'},% single quotes in green
-    moredelim=*[s][\color{black}\ttfamily]{options}{\}},%  options in black (until trailing })
-    commentstyle={\color{gray}\itshape},%                  gray italics for comments
-    morecomment=[l]{//},%                                  define // comment
-    emph={%
-        STRING%                                            literal strings listed here
-        },emphstyle={\color{blue}\ttfamily},%              and formatted in blue
-    alsoletter={:,|,;},%
-    morekeywords={:,|,;},%                                 define the special characters
-    keywordstyle={\color{black}},%                         and format them in black
+
+
+
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break,interface},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this,extends,export},
+  ndkeywordstyle=\color{darkgreen}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
 }

@@ -6,7 +6,7 @@ Together with this thesis a \textit{.zip} file is submitted, which contains the 
 
 \subsubsection{ObjectExpression}
 \label{eslint:object_expression}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface ObjectExpression <: Expression {
     type: "ObjectExpression";
     properties: [ Property ];
@@ -15,7 +15,7 @@ interface ObjectExpression <: Expression {
 
 \subsubsection{Property}
 \label{eslint:property}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface Property <: Node {
     type: "Property";
     key: Literal | Identifier;
@@ -26,7 +26,7 @@ interface Property <: Node {
 
 \subsubsection{VElement}
 \label{eslint:velement}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface VElement <: Node {
   type: "VElement"
   namespace: string
@@ -40,7 +40,7 @@ interface VElement <: Node {
 
 \subsubsection{VText}
 \label{eslint:vtext}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface VText <: Node {
   type: "VText"
   value: string
@@ -49,7 +49,7 @@ interface VText <: Node {
 
 \subsubsection{VAttribute}
 \label{eslint:VAttribute}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface VAttribute <: Node {
   type: "VAttribute"
   directive: false
@@ -60,7 +60,7 @@ interface VAttribute <: Node {
 
 \subsubsection{Identifier}
 \label{eslint:identifier}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface Identifier <: Expression, Pattern {
   type: "Identifier";
   name: string;
@@ -69,7 +69,7 @@ interface Identifier <: Expression, Pattern {
 
 \subsubsection{MemberExpression}
 \label{eslint:member_expression}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface MemberExpression <: Expression, Pattern {
   type: "MemberExpression";
   object: Expression;
@@ -81,7 +81,7 @@ interface MemberExpression <: Expression, Pattern {
 \subsubsection{CallExpression}
 \label{eslint:call_expression}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 interface CallExpression <: Expression {
   type: "CallExpression";
   callee: Expression;
@@ -91,7 +91,7 @@ interface CallExpression <: Expression {
 
 \subsubsection{AssignmentExpression}
 \label{eslint:AssignmentExpression}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 extend interface AssignmentExpression {
     left: Pattern;
 }
@@ -101,7 +101,7 @@ extend interface AssignmentExpression {
 \section{Source Code}
 \subsection{Math for Kids}
 \label{appendix:math_kids_basic_source_code}
-\begin{lstlisting}
+\begin{lstlisting}[style=vue]
 <template>
     <div>
       <div style="margin-left: 5px; margin-top: 20px">
@@ -227,7 +227,7 @@ extend interface AssignmentExpression {
 \end{lstlisting}
 \subsection{Math for Kids Extended}
 \label{appendix:math_kids_extended_source_code}
-\begin{lstlisting}
+\begin{lstlisting}[style=vue]
 <template>
     <div>
       <ul>
@@ -431,7 +431,7 @@ extend interface AssignmentExpression {
 \end{lstlisting}
 \subsection{Menu with daily meal}
 \label{appendix:daily_menu_source_code}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 <template>
     <div style="margin-left: 20px">
     <div>Menu</div>
@@ -507,7 +507,7 @@ extend interface AssignmentExpression {
 \section{Generated Gherkin Scenarios}
 \subsection{Math for Kids Extended}
 \label{appendix:math_kids_extended_scenarios}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 Scenario: ['created']
 	When 'created'
 	Then 'problems[i].a'

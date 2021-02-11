@@ -14,9 +14,8 @@
 \newcommand{\matrNumber}{553324}
 \newcommand{\universityName}{Hochschule für Technik und Wirtschaft Berlin}
 
-\newcommand{\code}[1]{\emph{\lstinline{#1}}}
 
-\newcommand{\astnode}[1]{\emph{\lstinline{#1}}}
+
 
 \title{\thesisTitle}
 \author{\thesisAuthor}
@@ -34,10 +33,9 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
-\usepackage{glossaries}
+\usepackage[acronym,toc]{glossaries}
 
 % page style and footers, headers
-%TODO this caused errors
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
@@ -70,10 +68,17 @@
 \usepackage{float}
 \restylefloat{table}
 %End packages
+\definecolor{code_background}{HTML}{E0E0E0}
+\definecolor{ast_background}{HTML}{b2d6ce}
+\definecolor{darkgreen}{HTML}{14360b}
+\newcommand{\code}[1]{\colorbox{code_background}{\lstinline{#1}}}
+\newcommand{\astnode}[1]{\colorbox{ast_background}{\lstinline{#1}}}
+
 
 \usepackage[T1]{fontenc}
 \usepackage{beramono}
 
+\makeglossaries
 \input{chapters/00_glossary}
 \input{chapters/00_prog_lang}
 
@@ -84,6 +89,9 @@
 \input{abstract}
 
 \tableofcontents{}
+%TODO figure out how to print this
+
+\printglossaries
 
 \chapter{Introduction}
 \label{chapter:introduction}
@@ -112,12 +120,6 @@
 \newpage
 \listoffigures{}
 \listoftables{}
-
-
-
-%TODO figure out how to print this
-\newpage
-\printglossaries
 
 \nocite{*}
 \printbibliography{}
