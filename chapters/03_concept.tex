@@ -5,21 +5,20 @@ It is assumed that the Vue.js code, for which interaction diagrams are going to 
 \subsection{Limitations}
 \label{concept:parsing_limits}
 
-In order to be able to generate interaction diagrams, which capture every aspect of Vue.js, the generation must be directly based on an \gls{ast}, which covers every possible syntax, such as \cite{eslint_vue_parser}. 
-
-The approach proposed here only includes the following features of Vue.js:
+In order to be able to generate interaction diagrams, which capture every aspect of Vue.js, the generation must be based on an \gls{ast}, which covers every possible syntax, such as \cite{eslint_vue_parser_ast}. The approach proposed here only includes the following features of Vue.js:
 \begin{itemize}
     \item Event handlers (including anonymous method syntax and method reference syntax)
     \item Any one or two-way binding expressions (\code{v-model}, \code{v-bind}, "moustache", \code{v-if}) excluding \code{v-else}
     \item \code{v-for} statements for lists, excluding iterating through properties of an object or iteration with index (property zipped with index)
-    \item distinguishing between properties and computed properties
-    \item complex object and lists (non-nested) models 
-    \item methods, including the resolution of arguments, they have been called with (excluding methods called with other methods as arguments)
+    \item computed properties
+    \item complex objects
+    \item non-nested lists 
+    \item methods, including the resolution of arguments, they have been called with (excluding other methods as arguments)
 \end{itemize}
 
 \subsection{AST}
-
-\begin{lstlisting}[language=antrl]
+\label{ast}
+\begin{lstlisting}[language=antrl,basicstyle=\fontsize{8}{8}\selectfont\ttfamily]
 grammar vue_simple;
 
 program: bindings methodDefinitions createdMethod topLevelProperties computedProperties;
@@ -75,38 +74,34 @@ NAME_IDENTIFIER:  JS_IDENTIFIER;
 JS_IDENTIFIER:  (UNICODE | '$' | '_') (UNICODE | '$' | '_' | [0-9])*;
 UNICODE: [\u0000-\uFFFF];
 \end{lstlisting}
-\label{ast}
 
-A Vue.js \gls{spa}, including all the necessary information for \ref{concept:parsing_limits}, can be defined using the above grammar. 
 
-The application consists of \code{bindings} \code{methodDefinitions} a \code{createdMethod}, \code{topLevelProperties} and \code{computedProperties}. 
+A Vue.js \gls{spa}, including all the necessary information for \ref{concept:parsing_limits}, can be defined using the above grammar. The application consists of \astnode{bindings} \astnode{methodDefinitions} a \astnode{createdMethod}, \astnode{topLevelProperties} and \astnode{computedProperties}. 
 
-The \code{topLevelProperties} represent the \code{data} object of the Vue.js \code{script} tag. Each property will be represented flattened, as a list of identifiers and prefixed with \code{this},in order to indicate it belongs to the top level data object. For example \code{problem:\{a:0, b:0\}} will be represented as follows:
+The \astnode{topLevelProperties} represent the \code{data} object of the Vue.js \code{script} tag. Each property will be represented flattened, as a list of identifiers and prefixed with \astnode{THIS}, in order to indicate it belongs to the model. For example \code{problem:\{a:0, b:0\}} will be represented as follows:
 
 \begin{figure}[H]
+    \centering
     \includegraphics[width=0.8\textwidth]{images/ast_top_level.png}
-     \caption{\gls{ast} for top-level example }
+     \caption{\gls{ast} for top-level properties example }
      \label{fig:ast_top_level}
 \end{figure}
 
-Bindings can be obtained from the Vue.js \code{template}.
-
-Each binding consists of an HTML tag, an a list of binding sources for that tag - pairs of variable or method call and a binding type. The binding type represents the type of the binding - either event, one-way or two-way. Two-way bindings are only valid with properties, whereas for events and one-way bindings, both method calls and properties are possible, since in Vue.js a binding source could be an expressions defined as an inline anonymous functions (
-    \code{<div v-if=\"value === true\"/>}
+The bindings of the Vue.js component (\astnode{bindings}) can be obtained from the \code{template}. Each binding consists of an HTML tag, a list of binding sources for that tag - pairs of variable or method calls and a binding type. The binding type represents the type of the binding - either event, one-way or two-way. Two-way bindings are only valid with properties, whereas for events and one-way bindings, both method calls and properties are possible, since in Vue.js a binding source could be an expressions defined as an inline anonymous functions (
+    \code{<div v-if=\"value === true && func()\"/>}
 ). The binding sources are a list, since a tag could have multiple different bound properties, or a bound expression. The information about how exactly the properties are bound, if it is the same type of binding, is discarded.
 
-Method calls include the parameters they have been called with - other methods or just variables. It is also possible to call methods with binary expressions - those are represented as a special method, which takes 2 parameters - the left and right side operators of the binary expression. Expressions with multiple terms can be represented as multiple binary expressions. This representation loses information such as the order of operations, but since we are only interested in which properties are being accessed, this loss does not pose an issue.
+Method calls (\astnode{calledMethod}) include the arguments they have been called with - other methods or just variables. It is also possible to call methods with binary expressions - those are represented as a special method, which takes 2 arguments - the left and right side operators of the binary expression. Expressions with multiple terms can be represented as multiple binary expressions. This representation loses information such as the order of operations, but since we are only interested in which properties are being accessed, this loss does not pose an issue.
 
-A special case is accessing lists. For example \code{<div v-bind="problems[0].a"/>} would result in the following:
+A special case is accessing lists. For example \code{<div v-bind="problems[0].a"/>} would result in the following \gls{ast}:
 
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/ast_problems_0_a.png}
-     \caption{\gls{ast} for example }
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/ast_problems_0_a.png}
+     \caption{\gls{ast} for a list access example }
      \label{fig:ast_list_simple}
 \end{figure}
-
-
-\code{v-for} statements, are substituted:
+Another special case are \code{v-for} statements. They are substituted:
 \begin{lstlisting}[style=html]
 <ul>
   <li v-for="subject in subjects" :key="subject.id">
@@ -114,32 +109,27 @@ A special case is accessing lists. For example \code{<div v-bind="problems[0].a"
   </li>
 </ul>
 \end{lstlisting}
-results in
-\begin{lstlisting}[style=html]
-subjects[i].problems[0]
-\end{lstlisting}
-which in term produces the following AST:
+results in \code{subjects[i].problems[0]} which in term produces the following AST:
 
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/ast_numeric_generic.png}
-     \caption{\gls{ast} for example }
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/ast_numeric_generic.png}
+     \caption{\gls{ast} for a \code{v-for} substitution example }
      \label{fig:ast_list_complex}
 \end{figure}
 
-Nested lists are also possible and would result in multiple generic indices being added.
+Each \astnode{tag} includes its location in the source code (starting and ending line and column), which can also be used as an identifier. Tags also have humanly readable names, which are either equal to the the text of the tag, if it exists, or to the identifier of the first binding. 
 
-Each tag includes its location in the source code (starting and ending line and column), which can also be used as an identifier. Tags also have humanly readable names, which are either equal to the the text of the tag, if it exists, or to the identifier of the first binding. 
-
-\code{methodDefinitions} include all methods definitions from the \code{method} object of the \code{view-model}. Each method definition consists of the following
+\astnode{methodDefinitions} include all methods definitions from the \code{method} object of the view-model. Each method definition consists of the following
 \begin{itemize}
-    \item identifier - an identifier, equal to \code{this} followed by the name of the method
-    \item arguments - names of arguments, each of which is a simple name identifiers
-    \item reads - variable it reads from
-    \item writes - variables it writes to
-    \item calls - method calls, including arguments, same as for bindings 
+    \item \astnode{identifier} - an identifier, equal to \astnode{THIS} followed by the name of the method
+    \item \astnode{arguments} - names of arguments, each of which is a simple name identifiers
+    \item \astnode{reads} - variable it reads from
+    \item \astnode{writes} - variables it writes to
+    \item \astnode{calls} - method calls, including arguments, same as for bindings 
 \end{itemize}
 
-\code{computedProperties} are similar to \code{methodDefinitions} with the exception that they do not have arguments. Albeit bad practice, it is still possible for computed properties to have side effects and therefore they were modelled as methods.
+Computed properties (\astnode{computedProperties}) are similar to \astnode{methodDefinitions} with the exception that they do not have arguments. Albeit bad practice, it is still possible for computed properties to have side effects and therefore they were modelled as methods.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                   %
@@ -148,9 +138,10 @@ Each tag includes its location in the source code (starting and ending line and 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interaction Diagram Generation}
 
-The simplified Vue.js \gls{ast} can be used to create a directed graph, which will represent the interaction diagrams. It is hard to directly generate this graph, therefore the capabilities of a directed, \gls{compound_graph} graph will be leveraged and later on converted to a directed graph. 
+The simplified Vue.js \gls{ast} \ref{ast} can be used to create a directed graph, which will represent the interaction diagrams. It is hard to directly generate this graph, therefore the capabilities of a directed, compound graph will be leveraged and later on converted to a directed graph. 
+The core idea of the algorithm is to generate vertices only for nodes which are being accessed instead of the whole application. A second pass of the data is required in order to add additional edges for lists.
 
-Vertices in this graph have the following properties
+Vertices in this graph will have the following properties:
 \label{concept:interaction_diagram_structure}
 \begin{enumerate}
     \item \gls{guid} - used to reference and globally identify the vertex 
@@ -162,51 +153,47 @@ Vertices in this graph have the following properties
 
 Edges in the graph are directed and each have a label property, which is one of 'event', 'calls' or 'simple'. 
 
-The core idea of the algorithm is to generate vertices only for nodes which are being accessed instead of the whole application. A second pass of the data is also needed to add additional edges for lists. 
-
 \subsection{Variable Identifiers}
 \label{concept:variable_identifiers}
-Variable identifiers are represented by \astnode{identifier} and \astnode{thisIdentifier} in the \gls{ast} \ref{ast}. For the \astnode{this} and for each \astnode{id} node in the \astnode{identifier} or \astnode{thisIdentifier} a vertex is created in order. 
-Those vertices are connected using unidirectional edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous. There is one exception to this process - When accessed from \astnode{write} of a \code{method}, nodes of type \astnode{GENERIC_INDEX} are omitted. The reason behind this will be explained in this section \ref{concept:why_create_list};
+Variable identifiers are represented by \astnode{identifier} and \astnode{thisIdentifier} in the \gls{ast} \ref{ast}. For the \astnode{THOS} and for each \astnode{id} node in the \astnode{identifier} or \astnode{thisIdentifier} a vertex is created in order. 
+Those vertices are connected using unidirectional edges, labeled with 'data' and also each vertex (excluding the first one) has its parent set to the previous. There is one exception to this process - when written to from a method ( \astnode{write}), nodes of type \astnode{GENERIC_INDEX} are omitted. The reason behind this will be explained in \ref{concept:why_create_list};
 
-
-Each vertex has a \gls{guid} equal to the value of its terminal symbol (\astnode{NUMERIC_INDEX}, \astnode{GENERIC_INDEX} or \astnode{NAME_IDENTIFIER}), concatenated with the value of the previous vertex.
-The \code{label} of those vertices are equal to the terminal symbol in case of \astnode{NAME_IDENTIFIER} and in case of \astnode{GENERIC_INDEX} and \astnode{NUMERIC_INDEX}, combined with the \code{label} of the previous vertex using square braces. Set the type of each vertex to 'data'. Add the type 'numeric' to vertices created from \astnode{NUMERIC_INDEX} nodes and 'generic' to vertices created from \astnode{GENERIC_INDEX} nodes. 
+Each vertex has a \gls{guid} equal to the value of its terminal symbols - \astnode{NUMERIC_INDEX}, \astnode{GENERIC_INDEX} or \astnode{NAME_IDENTIFIER}, concatenated with the value of the previous vertex.
+The \code{label} of those vertices are equal to the terminal symbol in case of \astnode{NAME_IDENTIFIER}. In case of \astnode{GENERIC_INDEX} and \astnode{NUMERIC_INDEX}, they are combined with the \code{label} of the previous vertex using square braces. Set the type of each vertex to 'data'. Add the type 'numeric' to vertices created from \astnode{NUMERIC_INDEX} nodes and 'generic' to vertices created from \astnode{GENERIC_INDEX} nodes. 
 
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_simple.png}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/graph_simple.png}
      \caption{Example Graph obtained for the identifier \code{this.problems[0].a} }
      \label{fig:graph_simple}
 \end{figure}
 
 \subsection{Object representation}
-
-Using the representation for identifiers in the previous section, objects will result in being displayed dynamically, based on which properties are accessed. Nodes and edges are created on a 'create if non-existent' basis. In the example below, if \code{this.problem.b} is accessed after \code{this.problem.a} it will only result in the creation of the node \code{a} and edge \code{this.problem} -> \code{this.problem.b}.
+Using the representation for identifiers in the previous section, objects will result in being displayed dynamically, based on which properties are accessed. Nodes and edges are created on a 'create if non-existent' basis. In the example below, if \code{this.problem.b} is accessed after \code{this.problem.a} it will only result in the creation of the node \code{a} and edge \code{this.problem} $\rightarrow$  \code{this.problem.b}.
 
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_object.png}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/graph_object.png}
      \caption{Example Graph for the following object accesses - \code{this.problem.a}, \code{this.problem.b},  \code{this.problem.author.name} }
      \label{fig:graph_object}
 \end{figure}
 
-Furthermore, updates can be formulated nicely with the above representation. If \code{problem} were to be changed, it would result in a cascade update of all properties. If \code{author} would be change, it would only result in a cascading change in \code{name}. 
+Updates can be formulated nicely with the above representation. If \code{problem} were to be changed, it would result in a cascade update of all properties. If \code{author} would change, it would only result in a cascading change in \code{name}. 
 
 \subsection{List representation}
-\label{concept:list_creation}
+Fig. \ref{fig:graph_complete_example} shows the abstract idea behind list representations.Concrete elements, which are accessed, are denoted as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be used to update all elements of a list\label{concept:why_create_list} and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$, however in an update to $P_any$. The same construct can also be leveraged when it comes to properties of list elements. Each top level property of that element will have an $all$ vertex, connected to the $P_{all}$ node of the list and an example can be seen later in section \ref{fig:graph_complete_example}.  
 
-Lists will be represented based on the template in \ref{fig:graph_list_generic} for a list named $P$.  %TODO for a list named $P$ don\tlike this
+\label{concept:list_creation}
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_list_generic.png}
-     \caption{Generic List representation}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/graph_list_generic.png}
+     \caption{Abstract list representation}
      \label{fig:graph_list_generic}
 \end{figure}
 
-Concrete elements, which are accessed, are denoted as $P_{<index>}$ and additionally a vertex $P_{all}$, which can be used to update all elements of a list\label{concept:why_create_list} and their properties, is created. Another vertex $P_{any}$ is also created, which can be used to observe once any vertex of $P_1$, $P_2$, $P_3$, \dots $P_n$ changes. If $P_1$ were to be updated by any method, it would not result in updates to any of $P_2$, $P_3$, \dots $P_n$
-
-The same construct can also be leveraged when it comes to properties of list elements. Each top level property of that element will have an $all$ vertex, connected to the $P_{all}$ node of the list.  
-
 \begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_list.png}
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/graph_list.png}
      \caption{Concrete example of a list representation}
      \label{fig:graph_list}
 \end{figure}
@@ -219,7 +206,7 @@ First it should be determined if a vertex needs to be created for an \astnode{ca
 If that's the case, it is assumed, that it mutates whole property and the method should instead be treated as a write operation.
 If both of the above fail, the called method does not belong to context and is of no interest.
 
-The next step is to resolve the names of the arguments it has been called with \astnode{calledArgs}. Every argument, that can neither be found in \astnode{computedProperties} nor \astnode{topLevelProperties} is replace by a fixed word such as $OTHER$ or $*$. In order to obtain the \gls{guid} of the vertex, the name of the \astnode{methodDefinitionIdentifier} is taken, \astnode{THIS} is excluded, and concatenated with the the resolved arguments, which are joined with $,$ and surrounded with brackets. The \code{label} of this node is equal to its name, excluding \astnode{THIS} from arguments. 
+The next step is to resolve the names of the arguments it has been called with \astnode{calledArgs}. Every argument, that can neither be found in \astnode{computedProperties} nor \astnode{topLevelProperties} is replace by a fixed word such as \textit{OTHER} or \textit{*}. In order to obtain the \gls{guid} of the vertex, the name of the \astnode{methodDefinitionIdentifier} is taken, \astnode{THIS} is excluded, and concatenated with the the resolved arguments, which are joined with $,$ and surrounded with brackets. The \code{label} of this node is equal to its name, excluding \astnode{THIS} from arguments. 
 
 The vertex for the method call is now completed. Multiple calls of this method with the same arguments will all result in the same vertex.
 
@@ -233,43 +220,37 @@ Finally the process described in this section is repeated recursively for each \
 
 Computed properties are represented similarly to methods, except they cannot have arguments, so no substitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
 
-%TODO better name
-\subsubsection{Combining it all together}
+\subsubsection{Generating Interactions}
 \label{concept:algorithm_create_diagrams}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/graph_complete_example.png}
+     \caption{Example Interaction Diagram graph including list elements with properties. Circled nodes represent data node and rectangular ones HTML tags and methods.}
+     \label{fig:graph_complete_example}
+\end{figure}
 
 Interaction diagrams can be generated from the simplified Vue.js \gls{ast} in the following way:
+For each \astnode{binding} in \astnode{bindings} and for each \astnode{tag}, \astnode{bindingSource}  in \astnode{binding} create a vertex for \astnode{tag}, with a \gls{guid} \astnode{tagId}, label \astnode{name} and type 'tag'.
 
-For each \astnode{binding} in \astnode{bindings} and for each \astnode{tag}, \astnode{bindingSource}  in \astnode{binding}:
+if the \astnode{binding} is an \astnode{accessedVariable}, determine if it is a computed property by looking it up in \astnode{computedProperties} and if so, treat it as a computed property, and create vertices as described in \ref{concept:computed_property}. Otherwise determine if it is as top level property, by doing a lookup on \astnode{topLevelProperties}, treat it as a property and create vertices for it as described in \ref{concept:variable_identifiers}. In either cases, connect it to the \astnode{tag} vertex, based on the binding type. If the \astnode{accessedVariable} is neither, it does not belong to context and can be discarded. %TODO YADA YADA, ignore this prefix when checking
 
-Create a vertex for \astnode{tag}, with a \gls{guid} \astnode{tagId} and label \astnode{name} and type 'tag'.
-
-if the \astnode{binding} is an \astnode{accessedVariable}, determine if it is a computed property by looking it up in \astnode{computedProperties} and if so, treat it as a computed property, and create vertices as described in \ref{concept:computed_property}. Otherwise determine if it as top level property, by doing a lookup on \astnode{topLevelProperties}, treat it as a property and create vertices for it as described in \ref{concept:variable_identifiers}. In either cases, connect it to the \astnode{tag} vertex, based on the binding type. If the \astnode{accessedVariable} is neither, it does not belong to context and can be discarded. %TODO YADA YADA, ignore this prefix when checking
-
-if the \astnode{binding} is an \astnode{calledMethod} create a vertices for it as described in \ref{concept:methods}. Connect it to the \astnode{tag} vertex, based on the binding type.
+if the \astnode{binding} is a \astnode{calledMethod} create a vertices for it as described in \ref{concept:methods}. Connect it to the \astnode{tag} vertex, based on the binding type.
 
 Based on binding type, the following edges are created:
 \begin{itemize}
-    \item A) If the binding type is an event binding, create an 
+    \item A) If the binding type is an event binding, an 
 edge with the tag vertex as a source and the binding vertex as sink and label it 'event'. 
-\item B) If the binding type is one-way, create an edge with the binding vertex as source and the tag vertex as sink.
-\item C) If the binding type is two-way, create both edges - A) and B).
+\item B) If the binding type is one-way, an edge with the binding vertex as source and the tag vertex as sink.
+\item C) If the binding type is two-way, both edges - A) and B).
 \end{itemize}
+
 For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads}, \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
 
 
 Once all of the above is done, additional edges will need to be added for the \textit{all} vertices of properties of elements inside lists \ref{concept:list_creation}. Also the edges to the \textit{any} vertex will be missing. 
 
-'numeric' vertices to the 'generic' one. 
-
-This is achievable by first finding all vertices of type 'generic' or 'numeric' and obtaining the parent of each of them. Those parents form a subset of all vertices, that have have 'generic' or 'numeric' vertices as children and additionally other properties (properties on list elements, with $type(v) \neq generic, type(v) \neq numeric$). 
-For each of those parent vertices $p$:
-Firstly, connect each 'numeric' vertex to the 'generic' one. Recursively connect each child in the tree of the 'numeric' vertex to the child of the tree of the 'generic' vertex with the same name. If either does not exist, no edge is created. Do the same for $p$ and all 'numeric' vertices and the 'generic' vertex.
-
-\begin{figure}[H]
-    \includegraphics[width=0.8\textwidth]{images/graph_complete_example.png}
-     \caption{Example Graph including list elements with properties}
-     \label{fig:graph_complete_example}
-\end{figure}
+This is achievable by first finding all vertices of type 'generic' or 'numeric' and obtaining the parent of each of them. Those parents form a subset of all vertices, that have have 'generic' or 'numeric' vertices as children and additionally other properties (properties on list elements, with $type(v) \neq$ 'generic', $type(v) \neq$ 'numeric'). 
+For each of those parent vertices $p$ connect each 'numeric' vertex to the 'generic' one. Recursively connect each child in the tree of the 'numeric' vertex to the child of the tree of the 'generic' vertex with the same name. If either does not exist, no edge is created. Do the same for $p$ and all 'numeric' vertices and the 'generic' vertex.
 
 %TODO describe this and also verify above
 \section{Scenario Generation}
@@ -312,6 +293,5 @@ A Gherkin scenarios templated can then be obtained by the following template:
     \end{split}
     \end{align*}
 
-%TODO dynamically and then connect idea
 
 %lists better explain, generic acts as the any, etc.

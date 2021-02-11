@@ -71,9 +71,11 @@
 \restylefloat{table}
 %End packages
 \definecolor{code_background}{HTML}{E0E0E0}
-\definecolor{ast_background}{HTML}{b2d6ce}
+\definecolor{ast_background}{HTML}{deedea}
 \definecolor{darkgreen}{HTML}{14360b}
-\newcommand{\code}[1]{\colorbox{code_background}{\lstinline{#1}}}
+
+\definecolor{background}{HTML}{f9f9f9}
+\newcommand{\code}[1]{\colorbox{background}{\lstinline{#1}}}
 \newcommand{\astnode}[1]{\colorbox{ast_background}{\lstinline{#1}}}
 
 
@@ -121,7 +123,7 @@
 
 \newpage
 \listoffigures{}
-\listoftables{}
+%\listoftables{}
 
 \nocite{*}
 \printbibliography{}
