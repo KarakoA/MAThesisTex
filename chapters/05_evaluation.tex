@@ -39,7 +39,7 @@ the \textit{add\_problem} method to the \textit{New Problem} tag, which is missi
 The other difference is that in \parencite{zhang2019scenario} there is no edges from \textit{add\_problem} to \textit{right} (write relation), however there should be, 
 inside \textit{add\_problem} \code{this.right = undefined}.
 
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 l(created) -> a, b, answer, Check, Right, Wrong
 l(answer) -> answer, Check
 l(Check) -> Right, Wrong, Check, count_right, count_wrong
@@ -137,7 +137,7 @@ This differentiation is also evident in the generated Gherkin scenario templates
 
 All generated scenario templates up to 4 actions can be seen in  \ref{appendix:math_kids_extended_scenarios}
 
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 l(problems[i].answer) -> problems[i].answer, Check, Check
 l(Check) -> Right, Wrong, Check, Check, count_right_add, accuracy_add, count_wrong_add
 l(Check) -> Right, Wrong, Check, Check, count_right_sub, accuracy_sub, count_wrong_sub
@@ -187,7 +187,7 @@ The daily meal and it's price is changed each day via a button click, and altern
 \ref{fig:diagram_meal_list_properties} shows the interaction diagram for the application and the resulting reactions and scenarios of up to 4 steps can be seen in \ref{eval:reactions_meal} and \ref{eval:scenarios_meal} respectively.
 
 \label{eval:reactions_meal}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 l(New Day) -> Price, Meal of the day -
 l(Discount all) -> Best steak in town -, Price
 l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
@@ -204,7 +204,7 @@ Clicking on 'Discount all' does indeed change both 'Best steak in town' and some
 \end{figure}
 
 \label{eval:scenarios_meal}
-\begin{lstlisting}
+\begin{lstlisting}[language=JavaScript]
 Scenario: ['created']
 	When 'created'
 	Then 'meals[i].name'
