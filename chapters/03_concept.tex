@@ -18,7 +18,7 @@ In order to be able to generate interaction diagrams, which capture every aspect
 \newpage
 \subsection{AST}
 \label{ast}
-\begin{lstlisting}[language=antrl,basicstyle=\fontsize{8}{8}\selectfont\ttfamily]
+\begin{lstlisting}[language=antrl,basicstyle=\fontsize{8}{8}\selectfont\ttfamily,caption={Simplfied Vue.js AST}, captionpos=b]
 grammar vue_simple;
 
 program: bindings methodDefinitions createdMethod topLevelProperties computedProperties;
@@ -27,7 +27,6 @@ topLevelProperties: thisIdentifier*;
 methodDefinitions: methodDefinition*; 
 createdMethod: methodDefinition;
 computedProperties: (methodDefinitionIdentifier reads writes calls)*;
-
 methodDefinition: methodDefinitionIdentifier methodArgs reads writes calls;
 
 methodArgs: NAME_IDENTIFIER*;
@@ -102,7 +101,7 @@ A special case is accessing lists. For example \code{<div v-bind="problems[0].a"
      \label{fig:ast_list_simple}
 \end{figure}
 Another special case are \code{v-for} statements, which are substituted. The list
-\begin{lstlisting}[style=html]
+\begin{lstlisting}[style=html, caption={List using v-for}, captionpos=b]
 <ul>
   <li v-for="subject in subjects" :key="subject.id">
     {{ subject.problems[0] }}

@@ -43,7 +43,7 @@ the \code{add_problem} method to the \code{New Problem} tag, which is missing in
 The other difference is that in \parencite{zhang2019scenario} there is no edges from \code{add_problem} to \code{right} (write relation), however there should be, since
 inside \code{add_problem}, \code{this.right = undefined}.
 
-\begin{lstlisting}[language=JavaScriptPlain]
+\begin{lstlisting}[language=JavaScriptPlain, caption={Interactions of the Math for Kids application}, captionpos=b]
 l(created) -> a, b, answer, Check, Right, Wrong
 l(answer) -> answer, Check
 l(Check) -> Right, Wrong, Check, count_right, count_wrong
@@ -131,7 +131,7 @@ The Math for Kids application has been extended to display a list of past proble
 The resulting interaction diagram  is shown in \ref{fig:diagram_list_complex}. It looks more complex, but it is still possible to focus on specific components and see how they interact with others. It is also supplemented by the interactions  in \ref{scenario_tempalte_list}.
 
 \label{scenario_tempalte_list}
-\begin{lstlisting}[language=JavaScriptPlain]
+\begin{lstlisting}[language=JavaScriptPlain,caption = {Interactions of the Math for Kids Extended application}, captionpos=b,basicstyle=\fontsize{8}{8}\selectfont\ttfamily]
 l(problems[i].answer) -> problems[i].answer, Check, Check
 l(Check) -> Right, Wrong, Check, Check, count_right_add, accuracy_add, count_wrong_add
 l(Check) -> Right, Wrong, Check, Check, count_right_sub, accuracy_sub, count_wrong_sub
@@ -147,7 +147,7 @@ This example includes a bit of engineering. In the real world,there would probab
 
 \newpage
 \label{scenario_tempalte_list_scenario}
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption = {Chosen scenarios of the Math for Kids Extended application}, captionpos=b]
 Scenario: ['created', 'problems[i].answer', 'Check']
 	Given 'created'
 	And 'problems[i].answer'
@@ -182,7 +182,7 @@ Scenario: ['created', 'problems[i].answer', 'Check']
 
 
 \section{Menu with Daily Meal - Lists and Objects}
-"Menu with daily meal" is another simple example \gls{spa} which was developed with the aim of evaluating the capabilities of the application when dealing with lists and complex objects and can be seen in \ref{fig:eval_image_meal}. It displays a minimalistic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:daily_menu_source_code}.
+"Menu with Daily Meal" is another simple example \gls{spa} which was developed with the aim of evaluating the capabilities of the application when dealing with lists and complex objects and can be seen in \ref{fig:eval_image_meal}. It displays a minimalistic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:daily_menu_source_code}.
 
 The daily meal and its price is changed every day via a button click, and alternates between the first two items. The third item, steak, is never the daily meal. There is also an option to discount the price of all items. With stakes being the restaurant's special, there is an additional advertisement label promoting them.
 \begin{figure}[H]
@@ -202,7 +202,7 @@ The daily meal and its price is changed every day via a button click, and altern
         \includegraphics[width=0.65\textwidth]{images/meal_3.png}
         \caption{Discount was clicked and the price of all items got updated.}
     \end{subfigure}
-    \caption{The menu with daily meal application }
+    \caption{The Menu with Daily Meal application }
     \label{fig:eval_image_meal}
 \end{figure}
 \newpage
@@ -211,7 +211,7 @@ The daily meal and its price is changed every day via a button click, and altern
 Fig. \ref{fig:diagram_meal_list_properties} shows the interaction diagram for the application.
 
 \label{eval:reactions_meal}
-\begin{lstlisting}[language=JavaScriptPlain]
+\begin{lstlisting}[language=JavaScriptPlain,caption = {Interactions of the Menu with Daily Meal application}, captionpos=b]
 l(New Day) -> Price, Meal of the day -
 l(Discount all) -> Best steak in town -, Price
 l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
@@ -219,7 +219,7 @@ l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/diagram_meal.png}
-     \caption{Generated interaction diagram for Menu with daily meal}
+     \caption{Generated interaction diagram for Menu with Daily Meal}
      \label{fig:diagram_meal_list_properties}
 \end{figure}
 
@@ -227,7 +227,8 @@ l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
 The resulting interactions can be seen in \ref{eval:reactions_meal} and all scenarios of up to 4 steps are shown in \ref{eval:scenarios_meal}.
 
 \label{eval:scenarios_meal}
-\begin{lstlisting}[language=JavaScript,   basicstyle=\fontsize{9}{9}\selectfont\ttfamily]
+\begin{lstlisting}[language=JavaScript,   basicstyle=\fontsize{9}{9}\selectfont\ttfamily,
+    caption = {Chosen scenarios of the Menu with Daily Meal application}, captionpos=b]
 Scenario: ['created']
 	When 'created'
 	Then 'meals[i].name'

@@ -10,7 +10,7 @@ Each package includes a models directory, which includes the data types defined 
 The \code{web} directory contains code used to view the resulting diagram in the browser.
 The \code{scripts} directory includes helper bash scripts, \code{results} holds snapshots of the results throughout development at different timestamps (with the latest being the current) and \code{resources} hosts various additional resource files and outputs.
 \newpage
-\begin{lstlisting}[basicstyle=\tiny]
+\begin{lstlisting}[basicstyle=\tiny,caption={Directory structure of the project}, captionpos=b]
   root:.
   |-- resources
   |   |-- output
@@ -48,7 +48,7 @@ The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. C
 \subsection{Common Data Types}
 \label{common_data_types}
 Below are the common data types shared among all visitors. Discriminators are used to be able to differentiate between the types using type guards. The enums themselves are omitted here (\code{IdentifierType}, \code{EntityType}). The definitions here are not exactly the same as in the \gls{ast} \ref{ast} - some constraints are omitted, such as method names having to end on a a \code{NameIdentifier}. This will be given, since the parsed code would be invalid JavaScript otherwise.
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Common data type identifier}, captionpos=b]
 export type Identifiers = ReadonlyArray<Identifier>;
 export type Identifier = This | NameIdentifier | NumericIndex 
 | GenericIndex;
@@ -70,7 +70,7 @@ export interface NameIdentifier extends BaseIdentifier {
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Shared data types Property and Method}, captionpos=b]
 export type Entity = Method | Property;
 
 export interface Property {
@@ -86,7 +86,7 @@ export interface Method {
 
 \subsection{Top Level Properties}
 The result of the top level properties has the following data type:
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Result data type top level properties}, captionpos=b]
 export type TopLevelProperties = Array<Property>;
 
 export interface TopLevelPropertiesResult {
@@ -97,17 +97,17 @@ export interface TopLevelPropertiesResult {
 The top level properties visitor is the simplest of all since it only visits the top level \code{data} node inside the \code{script} object of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
 
 \label{impl:top_level_select}
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript, caption={Selector top level properties}, captionpos=b]]
 "ExportDefaultDeclaration > ObjectExpression > 
 Property[key.name = data] ReturnStatement > ObjectExpression"
 \end{lstlisting}
 In natural language the selector reads: "select \code{ObjectExpression} nodes, which have a direct parent \code{ReturnStatement}node, that has an indirect parent \code{Property} with a property \code{key.name} equal to \code{data} and a direct parent \code{ObjectExpression} with a direct parent \code{ExportDefaultDeclaration}.
 
 For each of the properties \ref{eslint:property} of the \code{ObjectExpression} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression}) it is concatenated with the previously obtained key. Finally all obtained properties are prefixed with 'this'.
-\newpage
+
 \subsection{Bindings}
 The result of the bindings visitor has the following data type:
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Result data types bindings}, captionpos=b]]
   export enum BindingType {
     EVENT = "event", ONE_WAY = "one-way", TWO_WAY = "two-way",
   }
@@ -141,7 +141,7 @@ A \code{CallExpression} contains information about the name of the method and th
 \code{VElement} nodes represent any HTML tag, matching a \astnode{tag} \ref{ast} abstracted in the \code{Tag} interface in code{template-bindings.ts} and contain information about the location of the tag and potentially a \code{VText} \ref{eslint:vtext} node, which will be set as its name if it is present. If not present, the name of the tag is equal to the name of the first binding. Therefore, information about tags is extracted once a \code{VElement} is exited, since all bindings will be known at this point.
 
 Further, the binding type has to be determined. This can be extracted based on the \code{VAttribute} \ref{eslint:VAttribute}. Event bindings have a \code{VAttribute} with a \code{key.name.name} equal to 'on', two-way bindings equal to 'model' and everything else is interpreted as one-way bindings. This includes moustache statements, \code{v-bind}, \code{v-if} bindings and all other except \code{v-for} statements. This filter be achieved via the powerful \code{:not} in combination with \code{:matches} selectors: 
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Selector one-way bindings}, captionpos=b]]
 ":not(:matches(
   VAttribute[key.name.name=on], 
   VAttribute[key.name.name=model],
@@ -150,7 +150,7 @@ Further, the binding type has to be determined. This can be extracted based on t
 \end{lstlisting}
 
 With all the above, for example to match all two-way bindings and pass them on to the builder can be done via
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Selector and visit for two-way bindings}, captionpos=b]]
 "VAttribute[key.name.name=model] > VExpressionContainer
 :matches(MemberExpression, Identifier, CallExpression)"(
   node) {
@@ -164,7 +164,7 @@ Bindings also need to substitute \code{v-for} statements. This is done by substi
 
 \subsection{Method Definitions}
 
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,   , caption={ Result data types method definitions}, captionpos=b]]
 export interface MethodDefinition {
   id: Identifiers;
   args: ReadonlyArray<Property>;
@@ -184,7 +184,7 @@ All method definition like structures (computed properties, created) and methods
 Analogous to how the top level \code{data} object is selected \ref{impl:top_level_select}, the \code{methods}, \code{created} and \code{computed} objects can be selected. 
 The name of the method including its arguments can be extracted from by \code{Property[value.type=FunctionExpression]} nodes. Using this information, one can have three selectors, one of each type, to determine what is being defined. For example for regular methods:
  
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Selector and visit start of method}, captionpos=b]
 "ExportDefaultDeclaration > ObjectExpression > Property
 [key.name = methods] Property[value.type=FunctionExpression]"(node) {
   builder.newMethod(node, MethodType.METHOD);
@@ -192,7 +192,7 @@ The name of the method including its arguments can be extracted from by \code{Pr
 \end{lstlisting}
 Further the properties read, written and methods called need to be extracted. Methods called can be obtained by selecting \code{CallExpression} nodes. Properties written to can be obtained from the left side of a \code{AssignmentExpression} \ref{eslint:AssignmentExpression}.
 There does not seem be an easy way to select all properties read from. Therefore all accessed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from. For example the following selector can be used to obtain all variables written to by the current method-like in scope:
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript,caption={Selector and visit variables written by method}, captionpos=b]
 "ExportDefaultDeclaration > ObjectExpression > 
 :matches(Property[key.name = methods], Property[key.name = created],
 Property[key.name = computed]) AssignmentExpression"(node) {
@@ -201,7 +201,7 @@ Property[key.name = computed]) AssignmentExpression"(node) {
 \end{lstlisting}
 \subsection{Output}
 Combining all of the above, the following data structure is output:
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript, caption={Result data type all combined}, captionpos=b]
 export class Result {
   fileName: string;
   topLevel: TopLevelPropertiesResult;
@@ -215,7 +215,8 @@ export class Result {
 The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{Transformer} class. The resolution of methods is abstracted in the \code{MethodResolver} class. It produces a 
 \linebreak \code{ResolvedMethodDefinition} for each called method in bindings and the initial method. In order to prevent duplicate resolution of methods and wasting of resources a \code{MethodCache} is introduced. The \code{Transformer} does not use the \code{MethodResolver} directly, but instead accesses it via the \code{MethodCache}. The cache includes directly called (bound to) and indirectly called (calls of methods), for each of which vertices will have to be created. 
 Each \code{ResolvedMethodDefinition} has the following data type:
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript
+  , caption={Resolved arguments and methods data type}, captionpos=b]
 export enum GeneralisedArgument {
   METHOD = "method",OTHER = "other",
 }
@@ -237,7 +238,7 @@ export interface CalledMethod {
 
 As the underlying structure for the graph graphlib is used and wrapped in an own class - \code{ExtendedGraph}. It creates vertices on a 'create if not exist' basis by first looking up to see if the vertex exists in the graph, and if it does, does not add it again. Presence of edges is not checked, if an edge is added again, the previous one is simply overwritten. There can only be one edge per direction between two nodes, since no multigraph is used. Nodes and Edges in the graph have the following structure:
 
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript, caption={Interaction Diagram graph edge data type}, captionpos=b]
 export enum EdgeType {
   SIMPLE = "simple", EVENT = "event", CALLS = "calls",
 }
@@ -247,7 +248,7 @@ export interface Edge {
   label: EdgeType;
 }
 \end{lstlisting}
-\begin{lstlisting}[language=JavaScript]
+\begin{lstlisting}[language=JavaScript, caption={Interaction Diagram graph node data type}, captionpos=b]
 export enum NodeType {
   TAG = "tag",  DATA = "data", METHOD = "method", INIT = "init",
 }
