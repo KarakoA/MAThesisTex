@@ -1,11 +1,11 @@
 \section{Project Structure and Overview}
-The application is written in TypeScript(excluding the ESLint visitors, which have to be in JavaScript) using NPM as a package manager and Node.js as a runtime environment. Notable dependencies include TypeScript\parencite{typescript}, for stricter syntax and types, lodash\parencite{lodash} for enrichening of collections, graphlib\parencite{graphlib} for the interaction diagrams graph,  babel\parencite{babel} as a transcompiler, ESLint\parencite{eslintMainPage}, Estree\parencite{estreeASTSpec} and eslint-plugin-vue\parencite{eslint_vue_parser} for parsing Vue.js code, d3-graphviz\parencite{graph_viz} in combination with light-server\parencite{light_server} for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
+The application is written in TypeScript (excluding the ESLint visitors, which have to be in JavaScript) using NPM as a package manager and Node.js as a runtime environment. Notable dependencies include TypeScript\parencite{typescript}, for stricter syntax and types, lodash\parencite{lodash} for enrichening of collections, graphlib\parencite{graphlib} for the interaction diagrams graph,  babel\parencite{babel} as a transcompiler, ESLint\parencite{eslintMainPage}, Estree\parencite{estreeASTSpec} and eslint-plugin-vue\parencite{eslint_vue_parser} for parsing Vue.js code, d3-graphviz\parencite{graph_viz} in combination with light-server\parencite{light_server} for visualization of the generated interaction diagrams. The full list of dependencies can be found in the \code{package.json} of the project.
 
-The application source code is linted using ESLint, unit tests are written in Jest (total of 109 tests cases) and also includes simplistic regression tests. Git is used for version control and also a CI/CD pipelines is setup, which on every commit executes the tests and regression tests and also ensures there are no type errors, as reported by TypeScript, and no linting errors, as reported by ESLint. 
+The application source code is linted using ESLint, unit tests are written in Jest (total of 109 tests cases) and also includes simplistic regression tests. Git is used for version control and also a CI/CD pipelines is set up, which on every commit executes the tests and regression tests and also ensures there are no type errors, as reported by TypeScript, and no linting errors, as reported by ESLint. 
 A separate minimal Vue.js project, in which the test Vue.js \gls{spa} applications can be rendered and easily viewed in a browser, was implemented as a separate repository and can be found here \parencite{KarakoA2021Feb}.
 
 \subsection{Project structure}
-The main source files of the project and their tests are included in the \code{src} directory and structured in several packages, each corresponding to a step in the process, There is also a \code{common} package, which is shared among all. Each will be described in more detail in the following sections.
+The main source files of the project and their tests are included in the \code{src} directory and structured in several packages, each corresponding to a step in the process. The \code{common} package is shared among all. Each will be described in more detail in the following sections.
 Each package includes a models directory, which includes the data types defined and used in this section.
 The \code{web} directory contains code used to view the resulting diagram in the browser.
 The \code{scripts} directory includes helper bash scripts, \code{results} holds snapshots of the results throughout development at different timestamps (with the latest being the current) and \code{resources} hosts various additional resource files and outputs.
@@ -46,11 +46,12 @@ The source files, which handle the parsing reside in the \code{parsing} director
 The \code{ESLinter} class provides a wrapper around the Node.js API of ESlint. Custom visitors are implemented in order to extract the necessary nodes from the \gls{ast} of ESLint. Each visitor has a matching file in \code{models}, which holds the models specific to that visitor, and a \code{builder}, which keeps track of the visited nodes and builds the result data type. There are a total of three visitors - one for top level properties, another for bindings and the last one for method definitions, computed properties and the created method.
  
 \subsection{Common Data Types}
+\label{common_data_types}
 Below are the common data types shared among all visitors. Discriminators are used to be able to differentiate between the types using type guards. The enums themselves are omitted here (\code{IdentifierType}, \code{EntityType}). The definitions here are not exactly the same as in the \gls{ast} \ref{ast} - some constraints are omitted, such as method names having to end on a a \code{NameIdentifier}. This will be given, since the parsed code would be invalid JavaScript otherwise.
 \begin{lstlisting}[language=JavaScript]
+export type Identifiers = ReadonlyArray<Identifier>;
 export type Identifier = This | NameIdentifier | NumericIndex 
 | GenericIndex;
-
 interface BaseIdentifier {
   readonly name: string;
 }
@@ -93,7 +94,7 @@ export interface TopLevelPropertiesResult {
 }
 \end{lstlisting}
 
-The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} object  of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
+The top level properties visitor is the simplest of all since it only visits the top level \code{data} node inside the \code{script} object of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
 
 \label{impl:top_level_select}
 \begin{lstlisting}[language=JavaScript]
@@ -103,7 +104,7 @@ Property[key.name = data] ReturnStatement > ObjectExpression"
 In natural language the selector reads: "select \code{ObjectExpression} nodes, which have a direct parent \code{ReturnStatement}node, that has an indirect parent \code{Property} with a property \code{key.name} equal to \code{data} and a direct parent \code{ObjectExpression} with a direct parent \code{ExportDefaultDeclaration}.
 
 For each of the properties \ref{eslint:property} of the \code{ObjectExpression} the name of the key (identifier) is stored. If the property is an object (value of \code{ObjectExpression}) it is concatenated with the previously obtained key. Finally all obtained properties are prefixed with 'this'.
-
+\newpage
 \subsection{Bindings}
 The result of the bindings visitor has the following data type:
 \begin{lstlisting}[language=JavaScript]
@@ -132,8 +133,8 @@ The result of the bindings visitor has the following data type:
 The ESlint \gls{ast} nodes, which are interesting when parsing the bindings are \code{VElement} \ref{eslint:velement}, 
 \code{Identifier} \ref{eslint:identifier}, \code{MemberExpression} \ref{eslint:member_expression} and \code{CallExpression} \ref{eslint:call_expression}. 
 
-A \code{identifier} \ref{ast}, abstracted
-in \code{common/identifier.ts}  can be a single \code{Identifier} or a \code{MemberExpression}, which can contain other \code{Identifier} nodes or \code{MemberExpression} nodes. Property Identifiers are extracted by finding the root \code{MemberExpression} or \code{Identifier} and traversing it. It is easy to determine if a \code{MemberExpression} or \code{Identifier} is the root - its parent is anything but a \code{MemberExpression}.
+\gls{ast} \astnode{identifier} nodes are abstracted as the nodes shown in \ref{common_data_types}
+in the \code{common/identifier.ts} file. They can be a single ESLint \code{Identifier} or a \code{MemberExpression}, which can contain other \code{Identifier} nodes or \code{MemberExpression} nodes. Property Identifiers are extracted by finding the root \code{MemberExpression} or \code{Identifier} and traversing it. It is easy to determine if a \code{MemberExpression} or \code{Identifier} is the root - its parent is anything but a \code{MemberExpression}.
 
 A \code{CallExpression} contains information about the name of the method and the arguments it has been called with, both in the form of nested \code{MemberExpression} and \code{CallExpression} nodes. Once again, only the root \code{CallExpression} node is extracted and converted to a \astnode{calledMethod} \ref{ast}, abstracted in the \code{Method} interface in \code{shared.ts}.
 
@@ -158,8 +159,6 @@ With all the above, for example to match all two-way bindings and pass them on t
     builder.identifierOrExpressionNew(node, BindingType.TWO_WAY);
 },
 \end{lstlisting}
-
-%TODO note why not args - method knows exactly what part
 
 Bindings also need to substitute \code{v-for} statements. This is done by substituting the left side of the \code{v-for} statement with its right side and a generic index in all bindings that use it.
 
@@ -192,9 +191,7 @@ The name of the method including its arguments can be extracted from by \code{Pr
 },
 \end{lstlisting}
 Further the properties read, written and methods called need to be extracted. Methods called can be obtained by selecting \code{CallExpression} nodes. Properties written to can be obtained from the left side of a \code{AssignmentExpression} \ref{eslint:AssignmentExpression}.
-There does not seem be an easy way to select all properties read from. Therefore all accessed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from.
-
-The following code can be used to obtain all variables written to by the current method-like in scope:
+There does not seem be an easy way to select all properties read from. Therefore all accessed identifiers are first stored and everything except reads, that can have an identifier (object properties, variable declarations, variables written to and names of called methods) is subtracted from it, in order to obtain the variables that the method reads from. For example the following selector can be used to obtain all variables written to by the current method-like in scope:
 \begin{lstlisting}[language=JavaScript]
 "ExportDefaultDeclaration > ObjectExpression > 
 :matches(Property[key.name = methods], Property[key.name = created],
@@ -215,9 +212,7 @@ export class Result {
 \end{lstlisting}
 \label{impl:result}
 \section{Interaction Diagram Generation}
-The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{Transformer} class. 
-
-The resolution of methods is abstracted in the \code{MethodResolver} class. It produces a 
+The generation of the interaction diagram graph from the result class from \ref{impl:result} is done in the \code{Transformer} class. The resolution of methods is abstracted in the \code{MethodResolver} class. It produces a 
 \linebreak \code{ResolvedMethodDefinition} for each called method in bindings and the initial method. In order to prevent duplicate resolution of methods and wasting of resources a \code{MethodCache} is introduced. The \code{Transformer} does not use the \code{MethodResolver} directly, but instead accesses it via the \code{MethodCache}. The cache includes directly called (bound to) and indirectly called (calls of methods), for each of which vertices will have to be created. 
 Each \code{ResolvedMethodDefinition} has the following data type:
 \begin{lstlisting}[language=JavaScript]
@@ -240,7 +235,7 @@ export interface CalledMethod {
 \end{lstlisting}
 
 
-As the underlying structure for the graph graphlib is used and wrapped in an own class - \code{ExtendedGraph}. It creates vertices on a 'create if not exist' basis by first looking up to see if the vertex exists in the graph, and if it does, does not add it again. Presence of edges is not checked, if an edge is added again, the previous one is simply overwritten. There can only be one edge per direction between two nodes, since no multigraph is used. Nodes and Edges in the graph have the following structure, as specified in \ref{concept:interaction_diagram_structure}:
+As the underlying structure for the graph graphlib is used and wrapped in an own class - \code{ExtendedGraph}. It creates vertices on a 'create if not exist' basis by first looking up to see if the vertex exists in the graph, and if it does, does not add it again. Presence of edges is not checked, if an edge is added again, the previous one is simply overwritten. There can only be one edge per direction between two nodes, since no multigraph is used. Nodes and Edges in the graph have the following structure:
 
 \begin{lstlisting}[language=JavaScript]
 export enum EdgeType {
@@ -280,8 +275,8 @@ export interface DataNode extends BaseNode {
 \end{lstlisting}
 
 
-The algorithm for generating the interaction diagrams graph as described in \ref{concept:algorithm_create_diagrams}
-is implemented in the \code{Transformer} class.
+The algorithm for generating the interaction diagrams graph as described in Sec. \ref{concept:algorithm_create_diagrams}
+is implemented in the \code{Transformer} class. 
 
 First the init method is resolved by querying the \code{MethodCache} and afterwards each of the bindings. The order is not important. If the bindings are properties, the vertices for them are created directly. If they are methods or computed properties, they are resolved by the \code{MethodCache} and the correct edges based on the binding type created. The above is done in the \code{addInit()} and \code{addBindings()} methods.
 
@@ -291,14 +286,17 @@ This happens in the \code{addIndirectlyCalledMethods()} method, after all bindin
 Lastly in the \code{addEdgesForLists} method additional edges will be added for the \textit{all} vertices of properties of elements inside lists.
 
 \section{Scenario Generation}
-The scenario generation is implemented in the \code{scenario.ts} file and currently outputs the obtained scenarios, tags, nodes react to and the Gherkin scenario templates to the console. The scenarios are generated exactly as described in \ref{concept:scenario_generation}.
+The scenario generation is implemented in the \code{scenario.ts} file and currently outputs the obtained scenarios, tags, nodes react to and the Gherkin scenario templates to the console. The scenarios are generated exactly as described in Sec. \ref{concept:scenario_generation}. When traversing the graph, visited nodes is being kept track of in order to avoid endless loops.
 
-\section{Display of Interaction Diagrams}
-In order to display the interaction diagrams it is displayed on a single HTML page, utilizing the d3-graphviz \parencite{graph_viz} library. 
+\section{Interaction Diagrams Display}
+The interaction diagram graph is visualized on a single HTML page, using the d3-graphviz \parencite{graph_viz} library. 
 
 Event edges are displayed as thick bold lines, calls edges are displayed as solid lines and all other as dashed lines.
 
-HTML tag nodes s are separated from all other nodes in a subgraph in order to be able to more easily identify them. In addition to their name, they also include the line(s) on which they are in the source code as a subline. The initial function has a grey background so it can be identified right away.
+HTML tag nodes are separated from all other nodes in a subgraph in order to be able to more easily identify them. In addition to their name, they also include the line(s) on which they are in the source code as a subline.
+
+The initial function has a grey background so it can be identified right away.
+
 A button to download the displayed diagram as a \code{.png} image is also provided in the top left.
 
 \section{Usage}
@@ -307,13 +305,15 @@ The application can be started using
 \begin{lstlisting}[style=bash]
 npm run generate -- [file to parse] [output graph path] [depth]
 \end{lstlisting}
-where file to parse is the path to the \code{.vue} file to be parsed and output graph path is the path to which the output interaction diagram graph will be written (JSON object). Depth is the factor $k$ in \ref{concept:scenario_generation}.
+where \code{file to parse} is the path to the \code{.vue} file to be parsed and \code{output graph path} is the path to which the output interaction diagram graph will be written as a serialized JSON object. \code{Depth} is the factor $k$ in Sec. \ref{concept:scenario_generation}.
+
 A web server can be started in order to view the results in a browser at \code{localhost:8000} via
 %lang bash
 \begin{lstlisting}[style=bash]
 npm run serve
 \end{lstlisting}
-In order to create a snapshot for each file in \code{resources/test-files}.
+
+In order to create a snapshot for each file in \code{resources/test-files}
 %lang bash
 \begin{lstlisting}[style=bash]
 npm run create-results  

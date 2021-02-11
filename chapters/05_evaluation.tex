@@ -1,5 +1,5 @@
 \section{Math for Kids - Simple Properties}
-\textcite{zhang2019scenario} use a \gls{spa} titled "Math for kids", which generates simple math addition problems and keeps track of a statistic, which includes the number of correctly and incorrectly answered problems as an example. The same application has been implemented and extended in Vue.js and will be used to showcase the capabilities of the interaction diagram and scenario generation application and compare the resulting diagrams to the ones in \parencite{zhang2019scenario}.
+\textcite{zhang2019scenario} use an example \gls{spa} titled "Math for kids", which generates simple math addition problems and keeps track of a statistic, which includes the number of correctly and incorrectly answered problems. The same application has been implemented and Vue.js and will be used to showcase the capabilities of the interaction diagram and scenario generation application and compare the resulting diagrams to the ones in \parencite{zhang2019scenario}. The source code for it can be found in \code{resources/test-files/test.vue} and also in \ref{appendix:math_kids_basic_source_code}.
 
 \begin{figure}[H]
     \centering
@@ -11,11 +11,11 @@
     \begin{subfigure}[t]{0.45\textwidth}
         \centering
         \includegraphics[width=0.45\textwidth]{images/math_for_kids_own.png}
-        \caption{Own implementation of Math for Kids in Vue.js}
+        \caption{Math for Kids in Vue.js, own implementation}
     \end{subfigure}
 \end{figure}
 
-The source code can be found in \code{resources/test-files/test.vue} and also in \ref{appendix:math_kids_basic_source_code}.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/diagram_own_math_kids.png}
@@ -23,6 +23,8 @@ The source code can be found in \code{resources/test-files/test.vue} and also in
      \label{fig:math_for_kids_own_interaction_diagram}
 \end{figure}
 
+
+\subsection{Interaction Diagrams}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/interaction_diagram_zhang.png}
@@ -48,18 +50,18 @@ l(Check) -> Right, Wrong, Check, count_right, count_wrong
 l(New Problem) -> a, b, answer, Check, Right, Wrong
 \end{lstlisting}
 
-The generated interactions differ for $l(created)$, all other sets are exactly the same as the ones by \textcite{zhang2019scenario} (albeit in different order). This may stem from the fact that the edges of \code{add_problem} to \code{\$scope.right} is missing in \parencite{zhang2019scenario}, however it is later correctly factored in $l(\textrm{New Problem})$.
+The generated interactions differ for \code{l(created)}.All other sets are exactly the same, albeit the HTNL tags are in different order. This may stem from the fact that the edges of \code{add_problem} to \code{\$scope.right} is missing in \parencite{zhang2019scenario}, however it is later correctly factored in in \code{l({New Problem})}.
 
 \textcite{zhang2019scenario} define the initial interaction as \code{l(add_problem() = 
 \{a, b\}} 
 whereas it should be 
 \code{l(add_problem() = \{Check, Right, Wrong, a, b, answer \}} since the answer property is updated based on the diagram. 
 
-One could argue, that the version in \parencite{zhang2019scenario} is correct, since $answer$ is set to $undefined$, which is the same as the initial value of the variable, so it would not trigger an update as part of the \code{init} method. The interaction diagram generator does not perform this check. If \code{add_problem()} were to be called later in the application (when the \code{New Problem} button is clicked) it would indeed set a new value to \code{answer}, which is correctly reflected by \textcite{zhang2019scenario}.
+One could argue, that the version in \parencite{zhang2019scenario} is correct, since \code{answer} is set to \code{undefined}, which is the same as the initial value of the variable, so it would not trigger an update as part of the \code{init} method. The interaction diagram generator does not perform this check. If \code{add_problem} were to be called later in the application (when the \code{New Problem} button is clicked) it would indeed set a new value to \code{answer}, which is correctly reflected by \textcite{zhang2019scenario}.
 
 
 \subsection{Scenarios}
-The generated Gherkin scenario templates of up to 4 actions can be seen in \ref{fig:eval_gherkin}. The program outputs the scenarios as plain text to the console, but here they are displayed in a nicer way. The caption of each figure is an example of how a text could be generated based on the template scenario output by the application. Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} \ref{amigos} to decide which templates to discard, since interaction diagrams model what \textit{might} be updated. The fact that everything which might get updated is displayed can also be leveraged in another way - negative criteria can be defined (verify component or tag $X$ did not change).
+The generated Gherkin scenario templates of up to 4 actions can be seen in \ref{fig:eval_gherkin}. The program outputs the scenarios as plain text to the console, but here they are displayed in a nicer way. The caption of each figure is an example of how a text could be generated based on the template scenario output by the application. Some scenarios seem a bit repetitive, but it is up to \textit{The Three Amigos} \ref{amigos} to decide which templates to discard, since interaction diagrams model what \textit{might} be updated. The fact that everything which might get updated is displayed can also be leveraged to define negative criteria, e.g.verify component or tag $X$ did not change.
 \begin{figure}[H]
    
     \caption{Gherkin scenario templates and sample human written scenarios based on the templates }
@@ -113,6 +115,9 @@ The generated Gherkin scenario templates of up to 4 actions can be seen in \ref{
 
 \end{figure}
 
+
+
+% SC
 \section{Math for Kids Extended - Lists and Computed Properties}
 The Math for Kids application has been extended to display a list of past problems and randomly generates either a subtraction or addition problem. It also keeps tracks of statistics separated by problem type and includes and additional accuracy statistic, which is implemented as a computed property. The application can be seen in \ref{fig:eval_image_list_complex} and the full source code can be found it \ref{appendix:math_kids_extended_source_code}
 \begin{figure}[H]
@@ -122,17 +127,52 @@ The Math for Kids application has been extended to display a list of past proble
      \label{fig:eval_image_list_complex}
 \end{figure}
 
-The resulting interaction diagram  is shown in \ref{fig:diagram_list_complex}. It looks more complex, but it is still possible to focus on specific components and see how they interact with others. 
+\subsection{Interaction Diagrams}
+The resulting interaction diagram  is shown in \ref{fig:diagram_list_complex}. It looks more complex, but it is still possible to focus on specific components and see how they interact with others. It is also supplemented by the interactions  in \ref{scenario_tempalte_list}.
 
-The two vertices for the computed properties \textit{accuracy\_sub} and \textit{accuracy\_add} correctly directly depend on \textit{count\_right\_sub}, \textit{count\_wrong\_sub} and \textit{count\_right\_add}, \textit{count\_wrong\_add} respectively. By looking at the interactions, one can observe that based on which of the mutually exclusive Check buttons is clicked on, either the substituting or addition related properties are updated. This differentiation is also evident in the generated Gherkin scenario templates. The full list of generated scenario templates of up to 4 actions can be seen in  \ref{appendix:math_kids_extended_scenarios}
+\label{scenario_tempalte_list}
 \begin{lstlisting}[language=JavaScriptPlain]
-    l(problems[i].answer) -> problems[i].answer, Check, Check
-    l(Check) -> Right, Wrong, Check, Check, count_right_add, accuracy_add, count_wrong_add
-    l(Check) -> Right, Wrong, Check, Check, count_right_sub, accuracy_sub, count_wrong_sub
-    l(New Problem) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
-    l(created) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
-    \end{lstlisting}
-This example includes a bit of engineering - more realistically there would a single button, which checks inside the bound method which should be updated, however the application would not be able to be differentiate them in this case, since if statements inside methods are not supported. 
+l(problems[i].answer) -> problems[i].answer, Check, Check
+l(Check) -> Right, Wrong, Check, Check, count_right_add, accuracy_add, count_wrong_add
+l(Check) -> Right, Wrong, Check, Check, count_right_sub, accuracy_sub, count_wrong_sub
+l(New Problem) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
+l(created) -> problems[i].a, +, -, Check, Check, problems[i].b, problems[i].answer, Right, Wrong
+\end{lstlisting}
+\subsection{Scenarios}
+
+The two vertices for the computed properties \code{accuracy_sub} and \code{accuracy_add} correctly depend on \code{count_right_sub}, \code{count_wrong_sub} and \code{count_right_add}, \code{count_wrong_add} respectively. By looking at the interactions \ref{scenario_tempalte_list}, 
+Based on which of the mutually exclusive \code{Check} buttons is clicked on, either the substituting or addition related properties are updated. This is also reflected both in the interactions\ref{scenario_tempalte_list} and the generated Gherkin scenario templates \ref{scenario_tempalte_list_scenario}. The full list of generated scenario templates of up to 4 actions can be found in \ref{appendix:math_kids_extended_scenarios}.
+
+This example includes a bit of engineering. In the real world,there would probably be a single button, which checks inside the bound method which statistic should be updated, however the application would not be able to be differentiate them in this case, since if statements inside methods are not supported.
+
+\newpage
+\label{scenario_tempalte_list_scenario}
+\begin{lstlisting}[language=JavaScript]
+Scenario: ['created', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_add'
+	And 'accuracy_add'
+    And 'count_wrong_add'
+
+Scenario: ['created', 'problems[i].answer', 'Check']
+	Given 'created'
+	And 'problems[i].answer'
+	When 'Check'
+	Then 'Right'
+	And 'Wrong'
+	And 'Check'
+	And 'Check'
+	And 'count_right_sub'
+	And 'accuracy_sub'
+	And 'count_wrong_sub'
+\end{lstlisting}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/diagram_list_add_sub.png}
@@ -141,42 +181,50 @@ This example includes a bit of engineering - more realistically there would a si
 \end{figure}
 
 
+\section{Menu with Daily Meal - Lists and Objects}
+"Menu with daily meal" is another simple example \gls{spa} which was developed with the aim of evaluating the capabilities of the application when dealing with lists and complex objects and can be seen in \ref{fig:eval_image_meal}. It displays a minimalistic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:daily_menu_source_code}.
 
-%TODO double check scenarios generated
-
-
-\section{Menu with daily meal - Lists and Objects}
-Another simple example \gls{spa} with the aim of evaluating the capabilities of the application when dealing with lists and complex objects was devised and can be seen in \ref{fig:eval_image_meal}. It shows a which displays a minimalistic menu for a restaurant with a meal of the day. The full source code for it can be found in \ref{appendix:daily_menu_source_code}.
-
-The daily meal and its price is changed every day via a button click, and alternates between the first two items. The third item, steak, is never the daily meal. There is also an option to discount the price of all items. With stakes being the restaurant's special, there is an additional advertisement label them.
+The daily meal and its price is changed every day via a button click, and alternates between the first two items. The third item, steak, is never the daily meal. There is also an option to discount the price of all items. With stakes being the restaurant's special, there is an additional advertisement label promoting them.
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[t]{0.45\textwidth}
+    \begin{subfigure}[t]{0.65\textwidth}
          \centering
-         \includegraphics[width=0.45\textwidth]{images/meal_1.png}
+         \includegraphics[width=0.65\textwidth]{images/meal_1.png}
          \caption{The current meal of the day is salad.}
     \end{subfigure}\hfill%
-    \begin{subfigure}[t]{0.45\textwidth}
+    \begin{subfigure}[t]{0.65\textwidth}
         \centering
-        \includegraphics[width=0.45\textwidth]{images/meal_2.png}
+        \includegraphics[width=0.65\textwidth]{images/meal_2.png}
         \caption{The 'new day' button has been clicked and the daily meal now changed to soup.}
     \end{subfigure}\hfill%
-    \begin{subfigure}[t]{0.45\textwidth}
+    \begin{subfigure}[t]{0.65\textwidth}
         \centering
-        \includegraphics[width=0.45\textwidth]{images/meal_3.png}
+        \includegraphics[width=0.65\textwidth]{images/meal_3.png}
         \caption{Discount was clicked and the price of all items got updated.}
     \end{subfigure}
     \caption{The menu with daily meal application }
     \label{fig:eval_image_meal}
 \end{figure}
+\newpage
 
-Fig. \ref{fig:diagram_meal_list_properties} shows the interaction diagram for the application. The resulting interactions can be seen in \ref{eval:reactions_meal} and scenarios of up to 4 steps are shown in \ref{eval:scenarios_meal}.
+\subsection{Interaction Diagrams}
+Fig. \ref{fig:diagram_meal_list_properties} shows the interaction diagram for the application.
+
 \label{eval:reactions_meal}
 \begin{lstlisting}[language=JavaScriptPlain]
 l(New Day) -> Price, Meal of the day -
 l(Discount all) -> Best steak in town -, Price
 l(created) -> meals[i].name, Price, Best steak in town -, Meal of the day -
 \end{lstlisting}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/diagram_meal.png}
+     \caption{Generated interaction diagram for Menu with daily meal}
+     \label{fig:diagram_meal_list_properties}
+\end{figure}
+
+\subsection{Scenarios}
+The resulting interactions can be seen in \ref{eval:reactions_meal} and all scenarios of up to 4 steps are shown in \ref{eval:scenarios_meal}.
 
 \label{eval:scenarios_meal}
 \begin{lstlisting}[language=JavaScript,   basicstyle=\fontsize{9}{9}\selectfont\ttfamily]
@@ -203,11 +251,3 @@ Scenario: ['created', 'Discount all']
 The \code{New Day} button changes the \code{Meal of the day} and some/all of the \code{Price} list HTML tags. Note that only the price of each meal is changed, the \code{meals[i].name} HTML tags remain the same. \code{Best steak in town} is also not updated, since steak, the last element, is the daily meal. 
 
 Clicking on \code{Discount all} does indeed change both \code{Best steak in town} and some/all \code{Price} HTML tags, since everything is discounted.
-
-\newpage
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{images/diagram_meal.png}
-     \caption{Generated interaction diagram for Menu with daily meal}
-     \label{fig:diagram_meal_list_properties}
-\end{figure}
