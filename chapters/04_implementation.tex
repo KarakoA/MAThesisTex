@@ -96,7 +96,6 @@ export interface TopLevelPropertiesResult {
 
 The top level properties visitor is the simplest of all since it only reacts to the top level \code{data} node inside the \code{script} object  of the Vue.js \gls{spa}, which is a \code{ObjectExpression} \ref{eslint:object_expression}. It can be selected via the following selector:
 
-%TODO lang
 \label{impl:top_level_select}
 \begin{lstlisting}[language=JavaScript]
 "ExportDefaultDeclaration > ObjectExpression > 
@@ -144,7 +143,6 @@ A \code{CallExpression} contains information about the name of the method and th
 \code{VElement} nodes represent any HTML tag, matching a \astnode{tag} \ref{ast} abstracted in the \code{Tag} interface in code{template-bindings.ts} and contain information about the location of the tag and potentially a \code{VText} \ref{eslint:vtext} node, which will be set as its name if it is present. If not present, the name of the tag is equal to the name of the first binding. Therefore, information about tags is extracted once a \code{VElement} is exited, since all bindings will be known at this point.
 
 Further, the binding type has to be determined. This can be extracted based on the \code{VAttribute} \ref{eslint:VAttribute}. Event bindings have a \code{VAttribute} with a \code{key.name.name} equal to 'on', two-way bindings equal to 'model' and everything else is interpreted as one-way bindings. This includes moustache statements, \code{v-bind}, \code{v-if} bindings and all other except \code{v-for} statements. This filter be achieved via the powerful \code{:not} in combination with \code{:matches} selectors: 
-%TODO lang
 \begin{lstlisting}[language=JavaScript]
 :not(:matches(
   VAttribute[key.name.name=on], 
@@ -326,7 +324,6 @@ npm run create-results
 Can be used. This snapshot includes the output interaction diagram graph as \code{data.json}, the generated scenarios as a \code{scenario.txt}, \code{index.html}, which can be used to display the interaction diagram and a \code{.vue} file for which all of the above was generated.
 
 All snapshots can be viewed using
-%lang bash
 \begin{lstlisting}[style=bash]
 npm run results 
 \end{lstlisting}

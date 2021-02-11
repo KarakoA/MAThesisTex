@@ -235,14 +235,13 @@ Finally the process described in this section is repeated recursively for each \
 
 Computed properties are represented similarly to methods, except they cannot have arguments, so no substitution of arguments is required. When defining their \code{label} and \gls{guid} both are equal to the \astnode{methodDefinitionIdentifier}. \astnode{reads}, \astnode{writes} and \astnode{calls} are computed in the same manner as methods. 
 
+%TODO better name
 \subsubsection{Combining it all together}
 \label{concept:algorithm_create_diagrams}
 
 Interaction diagrams can be generated from the simplified Vue.js \gls{ast} in the following way:
 
-%TODO how to indent
-For each \astnode{binding} in \astnode{bindings}:
-- for each \astnode{tag}, \astnode{bindingSource}  in \astnode{binding}:
+For each \astnode{binding} in \astnode{bindings} and for each \astnode{tag}, \astnode{bindingSource}  in \astnode{binding}:
 
 Create a vertex for \astnode{tag}, with a \gls{guid} \astnode{tagId} and label \astnode{name} and type 'tag'.
 
@@ -251,11 +250,12 @@ if the \astnode{binding} is an \astnode{accessedVariable}, determine if it is a 
 if the \astnode{binding} is an \astnode{calledMethod} create a vertices for it as described in \ref{concept:methods}. Connect it to the \astnode{tag} vertex, based on the binding type.
 
 Based on binding type, the following edges are created:
-A) If the binding type is an event binding, create an 
+\begin{itemize}
+    \item A) If the binding type is an event binding, create an 
 edge with the tag vertex as a source and the binding vertex as sink and label it 'event'. 
-B) If the binding type is one-way, create an edge with the binding vertex as source and the tag vertex as sink.
-C) If the binding type is two-way, create both edges - A) and B).
-
+\item B) If the binding type is one-way, create an edge with the binding vertex as source and the tag vertex as sink.
+\item C) If the binding type is two-way, create both edges - A) and B).
+\end{itemize}
 For the initial method - \astnode{createdMethod}, create a vertex with \gls{guid} and name equal to \textit{created} and create vertices for its \astnode{reads}, \astnode{writes} and \astnode{calls} analogous to methods as described in \ref{concept:methods}. 
 
 
@@ -304,14 +304,15 @@ This is repeated up to $k$ times, where $k$ is a constant set by the user.
 
 A Gherkin scenarios templated can then be obtained by the following template:
 
-Scenario - $n_0,n_1 \ldots n_k$
-
-Given - $n_0, n_1 \ldots n_{k-1}$
-
-When - $n_k$
-
-Then - $l(n_k)$
-
+\begin{align*}
+    \label{math:modifiedkneserneyoptimaldiscounts}
+    \begin{split}
+    Scenario &: n_0,n_1 \ldots n_k \\
+    Given &: n_0, n_1 \ldots n_{k-1} \\ 
+    When &: n_k \\
+    Then &: l(n_k) 
+    \end{split}
+    \end{align*}
 
 %TODO dynamically and then connect idea
 
