@@ -42,8 +42,7 @@ calledArgs: (calledMethod | accessedVariable)*;
 
 bindings: binding*;
 binding: tag bindingSource+;
-bindingSource: (accessedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING)
-                | accessedVariable TWO_WAY_BINDING;
+bindingSource: (accessedVariable | calledMethod) (EVENT_BINDING | ONE_WAY_BINDING) | accessedVariable TWO_WAY_BINDING;
 
 tag: name tagId loc;
 tagId: LINE '_' COLUMN '_' LINE '_' COLUMN;
@@ -57,7 +56,6 @@ calledMethodIdentifier: methodDefinitionIdentifier | id* NAME_IDENTIFIER;
 methodDefinitionIdentifier: THIS NAME_IDENTIFIER;
 thisIdentifier: THIS identifier;
 identifier: NAME_IDENTIFIER id*;
-
 
 id: NUMERIC_INDEX | GENERIC_INDEX | NAME_IDENTIFIER;
 

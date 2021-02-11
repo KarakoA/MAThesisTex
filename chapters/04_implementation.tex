@@ -99,9 +99,7 @@ The top level properties visitor is the simplest of all since it only reacts to 
 \label{impl:top_level_select}
 \begin{lstlisting}[language=JavaScript]
 "ExportDefaultDeclaration > ObjectExpression > 
-Property[key.name = data] ReturnStatement > ObjectExpression"(node){
-  ...
-}
+Property[key.name = data] ReturnStatement > ObjectExpression"
 \end{lstlisting}
 In natural language the selector reads: "Select ObjectExpression nodes, which have a direct parent ReturnStatement, that has an indirect parent Property with a property \code{key.name} equal to \code{data} and a direct parent ObjectExpression with a direct parent ExportDefaultDeclaration.
 
@@ -144,11 +142,11 @@ A \code{CallExpression} contains information about the name of the method and th
 
 Further, the binding type has to be determined. This can be extracted based on the \code{VAttribute} \ref{eslint:VAttribute}. Event bindings have a \code{VAttribute} with a \code{key.name.name} equal to 'on', two-way bindings equal to 'model' and everything else is interpreted as one-way bindings. This includes moustache statements, \code{v-bind}, \code{v-if} bindings and all other except \code{v-for} statements. This filter be achieved via the powerful \code{:not} in combination with \code{:matches} selectors: 
 \begin{lstlisting}[language=JavaScript]
-:not(:matches(
+":not(:matches(
   VAttribute[key.name.name=on], 
   VAttribute[key.name.name=model],
   VAttribute[key.argument.name=key],
-  VAttribute[key.name.name=for]))
+  VAttribute[key.name.name=for]))"
 \end{lstlisting}
 
 With all the above, for example to match all two-way bindings and pass them on to the builder can be done via 
